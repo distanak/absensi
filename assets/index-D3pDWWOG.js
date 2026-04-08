@@ -30,906 +30,455 @@ Option 2: Install and provide the "ws" package:
 `))throw Error(`@supabase/auth-js: Invalid SIWE message field "statement". Statement must not include '\\n'. Provided value: ${e.statement}`);let f=$r(e.address),p=`${l?`${l}://${n}`:n} wants you to sign in with your Ethereum account:\n${f}\n\n${e.statement?`${e.statement}\n`:``}`,m=`URI: ${u}\nVersion: ${d}\nChain ID: ${t}${a?`\nNonce: ${a}`:``}\nIssued At: ${i.toISOString()}`;if(r&&(m+=`\nExpiration Time: ${r.toISOString()}`),o&&(m+=`\nNot Before: ${o.toISOString()}`),s&&(m+=`\nRequest ID: ${s}`),c){let e=`
 Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/auth-js: Invalid SIWE message field "resources". Every resource must be a valid string. Provided value: ${t}`);e+=`\n- ${t}`}m+=e}return`${p}\n${m}`}var P=class extends Error{constructor({message:e,code:t,cause:n,name:r}){super(e,{cause:n}),this.__isWebAuthnError=!0,this.name=r??(n instanceof Error?n.name:void 0)??`Unknown Error`,this.code=t}},ri=class extends P{constructor(e,t){super({code:`ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY`,cause:t,message:e}),this.name=`WebAuthnUnknownError`,this.originalError=t}};function ii({error:e,options:t}){let{publicKey:n}=t;if(!n)throw Error(`options was missing required publicKey property`);if(e.name===`AbortError`){if(t.signal instanceof AbortSignal)return new P({message:`Registration ceremony was sent an abort signal`,code:`ERROR_CEREMONY_ABORTED`,cause:e})}else if(e.name===`ConstraintError`){if(n.authenticatorSelection?.requireResidentKey===!0)return new P({message:`Discoverable credentials were required but no available authenticator supported it`,code:`ERROR_AUTHENTICATOR_MISSING_DISCOVERABLE_CREDENTIAL_SUPPORT`,cause:e});if(t.mediation===`conditional`&&n.authenticatorSelection?.userVerification===`required`)return new P({message:`User verification was required during automatic registration but it could not be performed`,code:`ERROR_AUTO_REGISTER_USER_VERIFICATION_FAILURE`,cause:e});if(n.authenticatorSelection?.userVerification===`required`)return new P({message:`User verification was required but no available authenticator supported it`,code:`ERROR_AUTHENTICATOR_MISSING_USER_VERIFICATION_SUPPORT`,cause:e})}else if(e.name===`InvalidStateError`)return new P({message:`The authenticator was previously registered`,code:`ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED`,cause:e});else if(e.name===`NotAllowedError`)return new P({message:e.message,code:`ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY`,cause:e});else if(e.name===`NotSupportedError`)return n.pubKeyCredParams.filter(e=>e.type===`public-key`).length===0?new P({message:`No entry in pubKeyCredParams was of type "public-key"`,code:`ERROR_MALFORMED_PUBKEYCREDPARAMS`,cause:e}):new P({message:`No available authenticator supported any of the specified pubKeyCredParams algorithms`,code:`ERROR_AUTHENTICATOR_NO_SUPPORTED_PUBKEYCREDPARAMS_ALG`,cause:e});else if(e.name===`SecurityError`){let t=window.location.hostname;if(!di(t))return new P({message:`${window.location.hostname} is an invalid domain`,code:`ERROR_INVALID_DOMAIN`,cause:e});if(n.rp.id!==t)return new P({message:`The RP ID "${n.rp.id}" is invalid for this domain`,code:`ERROR_INVALID_RP_ID`,cause:e})}else if(e.name===`TypeError`){if(n.user.id.byteLength<1||n.user.id.byteLength>64)return new P({message:`User ID was not between 1 and 64 characters`,code:`ERROR_INVALID_USER_ID_LENGTH`,cause:e})}else if(e.name===`UnknownError`)return new P({message:`The authenticator was unable to process the specified options, or could not create a new credential`,code:`ERROR_AUTHENTICATOR_GENERAL_ERROR`,cause:e});return new P({message:`a Non-Webauthn related error has occurred`,code:`ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY`,cause:e})}function ai({error:e,options:t}){let{publicKey:n}=t;if(!n)throw Error(`options was missing required publicKey property`);if(e.name===`AbortError`){if(t.signal instanceof AbortSignal)return new P({message:`Authentication ceremony was sent an abort signal`,code:`ERROR_CEREMONY_ABORTED`,cause:e})}else if(e.name===`NotAllowedError`)return new P({message:e.message,code:`ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY`,cause:e});else if(e.name===`SecurityError`){let t=window.location.hostname;if(!di(t))return new P({message:`${window.location.hostname} is an invalid domain`,code:`ERROR_INVALID_DOMAIN`,cause:e});if(n.rpId!==t)return new P({message:`The RP ID "${n.rpId}" is invalid for this domain`,code:`ERROR_INVALID_RP_ID`,cause:e})}else if(e.name===`UnknownError`)return new P({message:`The authenticator was unable to process the specified options, or could not create a new assertion signature`,code:`ERROR_AUTHENTICATOR_GENERAL_ERROR`,cause:e});return new P({message:`a Non-Webauthn related error has occurred`,code:`ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY`,cause:e})}var oi=new class{createNewAbortSignal(){if(this.controller){let e=Error(`Cancelling existing WebAuthn API call for new one`);e.name=`AbortError`,this.controller.abort(e)}let e=new AbortController;return this.controller=e,e.signal}cancelCeremony(){if(this.controller){let e=Error(`Manually cancelling existing WebAuthn API call`);e.name=`AbortError`,this.controller.abort(e),this.controller=void 0}}};function si(e){if(!e)throw Error(`Credential creation options are required`);if(typeof PublicKeyCredential<`u`&&`parseCreationOptionsFromJSON`in PublicKeyCredential&&typeof PublicKeyCredential.parseCreationOptionsFromJSON==`function`)return PublicKeyCredential.parseCreationOptionsFromJSON(e);let{challenge:t,user:n,excludeCredentials:r}=e,i=S(e,[`challenge`,`user`,`excludeCredentials`]),a=nr(t).buffer,o=Object.assign(Object.assign({},n),{id:nr(n.id).buffer}),s=Object.assign(Object.assign({},i),{challenge:a,user:o});if(r&&r.length>0){s.excludeCredentials=Array(r.length);for(let e=0;e<r.length;e++){let t=r[e];s.excludeCredentials[e]=Object.assign(Object.assign({},t),{id:nr(t.id).buffer,type:t.type||`public-key`,transports:t.transports})}}return s}function ci(e){if(!e)throw Error(`Credential request options are required`);if(typeof PublicKeyCredential<`u`&&`parseRequestOptionsFromJSON`in PublicKeyCredential&&typeof PublicKeyCredential.parseRequestOptionsFromJSON==`function`)return PublicKeyCredential.parseRequestOptionsFromJSON(e);let{challenge:t,allowCredentials:n}=e,r=S(e,[`challenge`,`allowCredentials`]),i=nr(t).buffer,a=Object.assign(Object.assign({},r),{challenge:i});if(n&&n.length>0){a.allowCredentials=Array(n.length);for(let e=0;e<n.length;e++){let t=n[e];a.allowCredentials[e]=Object.assign(Object.assign({},t),{id:nr(t.id).buffer,type:t.type||`public-key`,transports:t.transports})}}return a}function li(e){if(`toJSON`in e&&typeof e.toJSON==`function`)return e.toJSON();let t=e;return{id:e.id,rawId:e.id,response:{attestationObject:ir(new Uint8Array(e.response.attestationObject)),clientDataJSON:ir(new Uint8Array(e.response.clientDataJSON))},type:`public-key`,clientExtensionResults:e.getClientExtensionResults(),authenticatorAttachment:t.authenticatorAttachment??void 0}}function ui(e){if(`toJSON`in e&&typeof e.toJSON==`function`)return e.toJSON();let t=e,n=e.getClientExtensionResults(),r=e.response;return{id:e.id,rawId:e.id,response:{authenticatorData:ir(new Uint8Array(r.authenticatorData)),clientDataJSON:ir(new Uint8Array(r.clientDataJSON)),signature:ir(new Uint8Array(r.signature)),userHandle:r.userHandle?ir(new Uint8Array(r.userHandle)):void 0},type:`public-key`,clientExtensionResults:n,authenticatorAttachment:t.authenticatorAttachment??void 0}}function di(e){return e===`localhost`||/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i.test(e)}function fi(){return!!(M()&&`PublicKeyCredential`in window&&window.PublicKeyCredential&&`credentials`in navigator&&typeof(navigator==null?void 0:navigator.credentials)?.create==`function`&&typeof(navigator==null?void 0:navigator.credentials)?.get==`function`)}async function pi(e){try{let t=await navigator.credentials.create(e);return t?t instanceof PublicKeyCredential?{data:t,error:null}:{data:null,error:new ri(`Browser returned unexpected credential type`,t)}:{data:null,error:new ri(`Empty credential response`,t)}}catch(t){return{data:null,error:ii({error:t,options:e})}}}async function mi(e){try{let t=await navigator.credentials.get(e);return t?t instanceof PublicKeyCredential?{data:t,error:null}:{data:null,error:new ri(`Browser returned unexpected credential type`,t)}:{data:null,error:new ri(`Empty credential response`,t)}}catch(t){return{data:null,error:ai({error:t,options:e})}}}var hi={hints:[`security-key`],authenticatorSelection:{authenticatorAttachment:`cross-platform`,requireResidentKey:!1,userVerification:`preferred`,residentKey:`discouraged`},attestation:`direct`},gi={userVerification:`preferred`,hints:[`security-key`],attestation:`direct`};function _i(...e){let t=e=>typeof e==`object`&&!!e&&!Array.isArray(e),n=e=>e instanceof ArrayBuffer||ArrayBuffer.isView(e),r={};for(let i of e)if(i)for(let e in i){let a=i[e];if(a!==void 0)if(Array.isArray(a))r[e]=a;else if(n(a))r[e]=a;else if(t(a)){let n=r[e];t(n)?r[e]=_i(n,a):r[e]=_i(a)}else r[e]=a}return r}function vi(e,t){return _i(hi,e,t||{})}function yi(e,t){return _i(gi,e,t||{})}var bi=class{constructor(e){this.client=e,this.enroll=this._enroll.bind(this),this.challenge=this._challenge.bind(this),this.verify=this._verify.bind(this),this.authenticate=this._authenticate.bind(this),this.register=this._register.bind(this)}async _enroll(e){return this.client.mfa.enroll(Object.assign(Object.assign({},e),{factorType:`webauthn`}))}async _challenge({factorId:e,webauthn:t,friendlyName:n,signal:r},i){try{let{data:a,error:o}=await this.client.mfa.challenge({factorId:e,webauthn:t});if(!a)return{data:null,error:o};let s=r??oi.createNewAbortSignal();if(a.webauthn.type===`create`){let{user:e}=a.webauthn.credential_options.publicKey;if(!e.name){let t=n;if(t)e.name=`${e.id}:${t}`;else{let t=(await this.client.getUser()).data.user,n=t?.user_metadata?.name||t?.email||t?.id||`User`;e.name=`${e.id}:${n}`}}e.displayName||=e.name}switch(a.webauthn.type){case`create`:{let{data:t,error:n}=await pi({publicKey:vi(a.webauthn.credential_options.publicKey,i?.create),signal:s});return t?{data:{factorId:e,challengeId:a.id,webauthn:{type:a.webauthn.type,credential_response:t}},error:null}:{data:null,error:n}}case`request`:{let t=yi(a.webauthn.credential_options.publicKey,i?.request),{data:n,error:r}=await mi(Object.assign(Object.assign({},a.webauthn.credential_options),{publicKey:t,signal:s}));return n?{data:{factorId:e,challengeId:a.id,webauthn:{type:a.webauthn.type,credential_response:n}},error:null}:{data:null,error:r}}}}catch(e){return j(e)?{data:null,error:e}:{data:null,error:new Nn(`Unexpected error in challenge`,e)}}}async _verify({challengeId:e,factorId:t,webauthn:n}){return this.client.mfa.verify({factorId:t,challengeId:e,webauthn:n})}async _authenticate({factorId:e,webauthn:{rpId:t=typeof window<`u`?window.location.hostname:void 0,rpOrigins:n=typeof window<`u`?[window.location.origin]:void 0,signal:r}={}},i){if(!t)return{data:null,error:new An(`rpId is required for WebAuthn authentication`)};try{if(!fi())return{data:null,error:new Nn(`Browser does not support WebAuthn`,null)};let{data:a,error:o}=await this.challenge({factorId:e,webauthn:{rpId:t,rpOrigins:n},signal:r},{request:i});if(!a)return{data:null,error:o};let{webauthn:s}=a;return this._verify({factorId:e,challengeId:a.challengeId,webauthn:{type:s.type,rpId:t,rpOrigins:n,credential_response:s.credential_response}})}catch(e){return j(e)?{data:null,error:e}:{data:null,error:new Nn(`Unexpected error in authenticate`,e)}}}async _register({friendlyName:e,webauthn:{rpId:t=typeof window<`u`?window.location.hostname:void 0,rpOrigins:n=typeof window<`u`?[window.location.origin]:void 0,signal:r}={}},i){if(!t)return{data:null,error:new An(`rpId is required for WebAuthn registration`)};try{if(!fi())return{data:null,error:new Nn(`Browser does not support WebAuthn`,null)};let{data:a,error:o}=await this._enroll({friendlyName:e});if(!a)return await this.client.mfa.listFactors().then(t=>t.data?.all.find(t=>t.factor_type===`webauthn`&&t.friendly_name===e&&t.status!==`unverified`)).then(e=>e?this.client.mfa.unenroll({factorId:e?.id}):void 0),{data:null,error:o};let{data:s,error:c}=await this._challenge({factorId:a.id,friendlyName:a.friendly_name,webauthn:{rpId:t,rpOrigins:n},signal:r},{create:i});return s?this._verify({factorId:a.id,challengeId:s.challengeId,webauthn:{rpId:t,rpOrigins:n,type:s.webauthn.type,credential_response:s.webauthn.credential_response}}):{data:null,error:c}}catch(e){return j(e)?{data:null,error:e}:{data:null,error:new Nn(`Unexpected error in register`,e)}}}};Qr();var xi={url:wn,storageKey:Tn,autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,headers:En,flowType:`implicit`,debug:!1,hasCustomAuthorizationHeader:!1,throwOnError:!1,lockAcquireTimeout:5e3,skipAutoInitialize:!1};async function Si(e,t,n){return await n()}var Ci={},wi=class e{get jwks(){return Ci[this.storageKey]?.jwks??{keys:[]}}set jwks(e){Ci[this.storageKey]=Object.assign(Object.assign({},Ci[this.storageKey]),{jwks:e})}get jwks_cached_at(){return Ci[this.storageKey]?.cachedAt??-(2**53-1)}set jwks_cached_at(e){Ci[this.storageKey]=Object.assign(Object.assign({},Ci[this.storageKey]),{cachedAt:e})}constructor(t){var n;this.userStorage=null,this.memoryStorage=null,this.stateChangeEmitters=new Map,this.autoRefreshTicker=null,this.autoRefreshTickTimeout=null,this.visibilityChangedCallback=null,this.refreshingDeferred=null,this.initializePromise=null,this.detectSessionInUrl=!0,this.hasCustomAuthorizationHeader=!1,this.suppressGetSessionWarning=!1,this.lockAcquired=!1,this.pendingInLock=[],this.broadcastChannel=null,this.logger=console.log;let r=Object.assign(Object.assign({},xi),t);if(this.storageKey=r.storageKey,this.instanceID=e.nextInstanceID[this.storageKey]??0,e.nextInstanceID[this.storageKey]=this.instanceID+1,this.logDebugMessages=!!r.debug,typeof r.debug==`function`&&(this.logger=r.debug),this.instanceID>0&&M()){let e=`${this._logPrefix()} Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.`;console.warn(e),this.logDebugMessages&&console.trace(e)}if(this.persistSession=r.persistSession,this.autoRefreshToken=r.autoRefreshToken,this.admin=new Kr({url:r.url,headers:r.headers,fetch:r.fetch}),this.url=r.url,this.headers=r.headers,this.fetch=ur(r.fetch),this.lock=r.lock||Si,this.detectSessionInUrl=r.detectSessionInUrl,this.flowType=r.flowType,this.hasCustomAuthorizationHeader=r.hasCustomAuthorizationHeader,this.throwOnError=r.throwOnError,this.lockAcquireTimeout=r.lockAcquireTimeout,r.lock?this.lock=r.lock:this.persistSession&&M()&&(globalThis==null?void 0:globalThis.navigator)?.locks?this.lock=Zr:this.lock=Si,this.jwks||(this.jwks={keys:[]},this.jwks_cached_at=-(2**53-1)),this.mfa={verify:this._verify.bind(this),enroll:this._enroll.bind(this),unenroll:this._unenroll.bind(this),challenge:this._challenge.bind(this),listFactors:this._listFactors.bind(this),challengeAndVerify:this._challengeAndVerify.bind(this),getAuthenticatorAssuranceLevel:this._getAuthenticatorAssuranceLevel.bind(this),webauthn:new bi(this)},this.oauth={getAuthorizationDetails:this._getAuthorizationDetails.bind(this),approveAuthorization:this._approveAuthorization.bind(this),denyAuthorization:this._denyAuthorization.bind(this),listGrants:this._listOAuthGrants.bind(this),revokeGrant:this._revokeOAuthGrant.bind(this)},this.persistSession?(r.storage?this.storage=r.storage:cr()?this.storage=globalThis.localStorage:(this.memoryStorage={},this.storage=qr(this.memoryStorage)),r.userStorage&&(this.userStorage=r.userStorage)):(this.memoryStorage={},this.storage=qr(this.memoryStorage)),M()&&globalThis.BroadcastChannel&&this.persistSession&&this.storageKey){try{this.broadcastChannel=new globalThis.BroadcastChannel(this.storageKey)}catch(e){console.error(`Failed to create a new BroadcastChannel, multi-tab state changes will not be available`,e)}(n=this.broadcastChannel)==null||n.addEventListener(`message`,async e=>{this._debug(`received broadcast notification from other tab or client`,e);try{await this._notifyAllSubscribers(e.data.event,e.data.session,!1)}catch(e){this._debug(`#broadcastChannel`,`error`,e)}})}r.skipAutoInitialize||this.initialize().catch(e=>{this._debug(`#initialize()`,`error`,e)})}isThrowOnErrorEnabled(){return this.throwOnError}_returnResult(e){if(this.throwOnError&&e&&e.error)throw e.error;return e}_logPrefix(){return`GoTrueClient@${this.storageKey}:${this.instanceID} (${xn}) ${new Date().toISOString()}`}_debug(...e){return this.logDebugMessages&&this.logger(this._logPrefix(),...e),this}async initialize(){return this.initializePromise||=(async()=>await this._acquireLock(this.lockAcquireTimeout,async()=>await this._initialize()))(),await this.initializePromise}async _initialize(){try{let e={},t=`none`;if(M()&&(e=lr(window.location.href),this._isImplicitGrantCallback(e)?t=`implicit`:await this._isPKCECallback(e)&&(t=`pkce`)),M()&&this.detectSessionInUrl&&t!==`none`){let{data:n,error:r}=await this._getSessionFromURL(e,t);if(r){if(this._debug(`#_initialize()`,`error detecting session from URL`,r),Bn(r)){let e=r.details?.code;if(e===`identity_already_exists`||e===`identity_not_found`||e===`single_identity_not_deletable`)return{error:r}}return{error:r}}let{session:i,redirectType:a}=n;return this._debug(`#_initialize()`,`detected session in URL`,i,`redirect type`,a),await this._saveSession(i),setTimeout(async()=>{a===`recovery`?await this._notifyAllSubscribers(`PASSWORD_RECOVERY`,i):await this._notifyAllSubscribers(`SIGNED_IN`,i)},0),{error:null}}return await this._recoverAndRefresh(),{error:null}}catch(e){return j(e)?this._returnResult({error:e}):this._returnResult({error:new Nn(`Unexpected error during initialization`,e)})}finally{await this._handleVisibilityChange(),this._debug(`#_initialize()`,`end`)}}async signInAnonymously(e){try{let{data:t,error:n}=await N(this.fetch,`POST`,`${this.url}/signup`,{headers:this.headers,body:{data:e?.options?.data??{},gotrue_meta_security:{captcha_token:e?.options?.captchaToken}},xform:Rr});if(n||!t)return this._returnResult({data:{user:null,session:null},error:n});let r=t.session,i=t.user;return t.session&&(await this._saveSession(t.session),await this._notifyAllSubscribers(`SIGNED_IN`,r)),this._returnResult({data:{user:i,session:r},error:null})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signUp(e){try{let t;if(`email`in e){let{email:n,password:r,options:i}=e,a=null,o=null;this.flowType===`pkce`&&([a,o]=await Cr(this.storage,this.storageKey)),t=await N(this.fetch,`POST`,`${this.url}/signup`,{headers:this.headers,redirectTo:i?.emailRedirectTo,body:{email:n,password:r,data:i?.data??{},gotrue_meta_security:{captcha_token:i?.captchaToken},code_challenge:a,code_challenge_method:o},xform:Rr})}else if(`phone`in e){let{phone:n,password:r,options:i}=e;t=await N(this.fetch,`POST`,`${this.url}/signup`,{headers:this.headers,body:{phone:n,password:r,data:i?.data??{},channel:i?.channel??`sms`,gotrue_meta_security:{captcha_token:i?.captchaToken}},xform:Rr})}else throw new Rn(`You must provide either an email or phone number and a password`);let{data:n,error:r}=t;if(r||!n)return await mr(this.storage,`${this.storageKey}-code-verifier`),this._returnResult({data:{user:null,session:null},error:r});let i=n.session,a=n.user;return n.session&&(await this._saveSession(n.session),await this._notifyAllSubscribers(`SIGNED_IN`,i)),this._returnResult({data:{user:a,session:i},error:null})}catch(e){if(await mr(this.storage,`${this.storageKey}-code-verifier`),j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signInWithPassword(e){try{let t;if(`email`in e){let{email:n,password:r,options:i}=e;t=await N(this.fetch,`POST`,`${this.url}/token?grant_type=password`,{headers:this.headers,body:{email:n,password:r,gotrue_meta_security:{captcha_token:i?.captchaToken}},xform:zr})}else if(`phone`in e){let{phone:n,password:r,options:i}=e;t=await N(this.fetch,`POST`,`${this.url}/token?grant_type=password`,{headers:this.headers,body:{phone:n,password:r,gotrue_meta_security:{captcha_token:i?.captchaToken}},xform:zr})}else throw new Rn(`You must provide either an email or phone number and a password`);let{data:n,error:r}=t;if(r)return this._returnResult({data:{user:null,session:null},error:r});if(!n||!n.session||!n.user){let e=new Ln;return this._returnResult({data:{user:null,session:null},error:e})}return n.session&&(await this._saveSession(n.session),await this._notifyAllSubscribers(`SIGNED_IN`,n.session)),this._returnResult({data:Object.assign({user:n.user,session:n.session},n.weak_password?{weakPassword:n.weak_password}:null),error:r})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signInWithOAuth(e){return await this._handleProviderSignIn(e.provider,{redirectTo:e.options?.redirectTo,scopes:e.options?.scopes,queryParams:e.options?.queryParams,skipBrowserRedirect:e.options?.skipBrowserRedirect})}async exchangeCodeForSession(e){return await this.initializePromise,this._acquireLock(this.lockAcquireTimeout,async()=>this._exchangeCodeForSession(e))}async signInWithWeb3(e){let{chain:t}=e;switch(t){case`ethereum`:return await this.signInWithEthereum(e);case`solana`:return await this.signInWithSolana(e);default:throw Error(`@supabase/auth-js: Unsupported chain "${t}"`)}}async signInWithEthereum(e){let t,n;if(`message`in e)t=e.message,n=e.signature;else{let{chain:r,wallet:i,statement:a,options:o}=e,s;if(!M()){if(typeof i!=`object`||!o?.url)throw Error(`@supabase/auth-js: Both wallet and url must be specified in non-browser environments.`);s=i}else if(typeof i==`object`)s=i;else{let e=window;if(`ethereum`in e&&typeof e.ethereum==`object`&&`request`in e.ethereum&&typeof e.ethereum.request==`function`)s=e.ethereum;else throw Error(`@supabase/auth-js: No compatible Ethereum wallet interface on the window object (window.ethereum) detected. Make sure the user already has a wallet installed and connected for this app. Prefer passing the wallet interface object directly to signInWithWeb3({ chain: 'ethereum', wallet: resolvedUserWallet }) instead.`)}let c=new URL(o?.url??window.location.href),l=await s.request({method:`eth_requestAccounts`}).then(e=>e).catch(()=>{throw Error(`@supabase/auth-js: Wallet method eth_requestAccounts is missing or invalid`)});if(!l||l.length===0)throw Error(`@supabase/auth-js: No accounts available. Please ensure the wallet is connected.`);let u=$r(l[0]),d=o?.signInWithEthereum?.chainId;d||=ei(await s.request({method:`eth_chainId`})),t=ni({domain:c.host,address:u,statement:a,uri:c.href,version:`1`,chainId:d,nonce:o?.signInWithEthereum?.nonce,issuedAt:o?.signInWithEthereum?.issuedAt??new Date,expirationTime:o?.signInWithEthereum?.expirationTime,notBefore:o?.signInWithEthereum?.notBefore,requestId:o?.signInWithEthereum?.requestId,resources:o?.signInWithEthereum?.resources}),n=await s.request({method:`personal_sign`,params:[ti(t),u]})}try{let{data:r,error:i}=await N(this.fetch,`POST`,`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:`ethereum`,message:t,signature:n},e.options?.captchaToken?{gotrue_meta_security:{captcha_token:e.options?.captchaToken}}:null),xform:Rr});if(i)throw i;if(!r||!r.session||!r.user){let e=new Ln;return this._returnResult({data:{user:null,session:null},error:e})}return r.session&&(await this._saveSession(r.session),await this._notifyAllSubscribers(`SIGNED_IN`,r.session)),this._returnResult({data:Object.assign({},r),error:i})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signInWithSolana(e){let t,n;if(`message`in e)t=e.message,n=e.signature;else{let{chain:r,wallet:i,statement:a,options:o}=e,s;if(!M()){if(typeof i!=`object`||!o?.url)throw Error(`@supabase/auth-js: Both wallet and url must be specified in non-browser environments.`);s=i}else if(typeof i==`object`)s=i;else{let e=window;if(`solana`in e&&typeof e.solana==`object`&&(`signIn`in e.solana&&typeof e.solana.signIn==`function`||`signMessage`in e.solana&&typeof e.solana.signMessage==`function`))s=e.solana;else throw Error(`@supabase/auth-js: No compatible Solana wallet interface on the window object (window.solana) detected. Make sure the user already has a wallet installed and connected for this app. Prefer passing the wallet interface object directly to signInWithWeb3({ chain: 'solana', wallet: resolvedUserWallet }) instead.`)}let c=new URL(o?.url??window.location.href);if(`signIn`in s&&s.signIn){let e=await s.signIn(Object.assign(Object.assign(Object.assign({issuedAt:new Date().toISOString()},o?.signInWithSolana),{version:`1`,domain:c.host,uri:c.href}),a?{statement:a}:null)),r;if(Array.isArray(e)&&e[0]&&typeof e[0]==`object`)r=e[0];else if(e&&typeof e==`object`&&`signedMessage`in e&&`signature`in e)r=e;else throw Error(`@supabase/auth-js: Wallet method signIn() returned unrecognized value`);if(`signedMessage`in r&&`signature`in r&&(typeof r.signedMessage==`string`||r.signedMessage instanceof Uint8Array)&&r.signature instanceof Uint8Array)t=typeof r.signedMessage==`string`?r.signedMessage:new TextDecoder().decode(r.signedMessage),n=r.signature;else throw Error(`@supabase/auth-js: Wallet method signIn() API returned object without signedMessage and signature fields`)}else{if(!(`signMessage`in s)||typeof s.signMessage!=`function`||!(`publicKey`in s)||typeof s!=`object`||!s.publicKey||!(`toBase58`in s.publicKey)||typeof s.publicKey.toBase58!=`function`)throw Error(`@supabase/auth-js: Wallet does not have a compatible signMessage() and publicKey.toBase58() API`);t=[`${c.host} wants you to sign in with your Solana account:`,s.publicKey.toBase58(),...a?[``,a,``]:[``],`Version: 1`,`URI: ${c.href}`,`Issued At: ${o?.signInWithSolana?.issuedAt??new Date().toISOString()}`,...o?.signInWithSolana?.notBefore?[`Not Before: ${o.signInWithSolana.notBefore}`]:[],...o?.signInWithSolana?.expirationTime?[`Expiration Time: ${o.signInWithSolana.expirationTime}`]:[],...o?.signInWithSolana?.chainId?[`Chain ID: ${o.signInWithSolana.chainId}`]:[],...o?.signInWithSolana?.nonce?[`Nonce: ${o.signInWithSolana.nonce}`]:[],...o?.signInWithSolana?.requestId?[`Request ID: ${o.signInWithSolana.requestId}`]:[],...o?.signInWithSolana?.resources?.length?[`Resources`,...o.signInWithSolana.resources.map(e=>`- ${e}`)]:[]].join(`
 `);let e=await s.signMessage(new TextEncoder().encode(t),`utf8`);if(!e||!(e instanceof Uint8Array))throw Error(`@supabase/auth-js: Wallet signMessage() API returned an recognized value`);n=e}}try{let{data:r,error:i}=await N(this.fetch,`POST`,`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:`solana`,message:t,signature:ir(n)},e.options?.captchaToken?{gotrue_meta_security:{captcha_token:e.options?.captchaToken}}:null),xform:Rr});if(i)throw i;if(!r||!r.session||!r.user){let e=new Ln;return this._returnResult({data:{user:null,session:null},error:e})}return r.session&&(await this._saveSession(r.session),await this._notifyAllSubscribers(`SIGNED_IN`,r.session)),this._returnResult({data:Object.assign({},r),error:i})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async _exchangeCodeForSession(e){let[t,n]=(await pr(this.storage,`${this.storageKey}-code-verifier`)??``).split(`/`);try{if(!t&&this.flowType===`pkce`)throw new Hn;let{data:r,error:i}=await N(this.fetch,`POST`,`${this.url}/token?grant_type=pkce`,{headers:this.headers,body:{auth_code:e,code_verifier:t},xform:Rr});if(await mr(this.storage,`${this.storageKey}-code-verifier`),i)throw i;if(!r||!r.session||!r.user){let e=new Ln;return this._returnResult({data:{user:null,session:null,redirectType:null},error:e})}return r.session&&(await this._saveSession(r.session),await this._notifyAllSubscribers(`SIGNED_IN`,r.session)),this._returnResult({data:Object.assign(Object.assign({},r),{redirectType:n??null}),error:i})}catch(e){if(await mr(this.storage,`${this.storageKey}-code-verifier`),j(e))return this._returnResult({data:{user:null,session:null,redirectType:null},error:e});throw e}}async signInWithIdToken(e){try{let{options:t,provider:n,token:r,access_token:i,nonce:a}=e,{data:o,error:s}=await N(this.fetch,`POST`,`${this.url}/token?grant_type=id_token`,{headers:this.headers,body:{provider:n,id_token:r,access_token:i,nonce:a,gotrue_meta_security:{captcha_token:t?.captchaToken}},xform:Rr});if(s)return this._returnResult({data:{user:null,session:null},error:s});if(!o||!o.session||!o.user){let e=new Ln;return this._returnResult({data:{user:null,session:null},error:e})}return o.session&&(await this._saveSession(o.session),await this._notifyAllSubscribers(`SIGNED_IN`,o.session)),this._returnResult({data:o,error:s})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signInWithOtp(e){try{if(`email`in e){let{email:t,options:n}=e,r=null,i=null;this.flowType===`pkce`&&([r,i]=await Cr(this.storage,this.storageKey));let{error:a}=await N(this.fetch,`POST`,`${this.url}/otp`,{headers:this.headers,body:{email:t,data:n?.data??{},create_user:n?.shouldCreateUser??!0,gotrue_meta_security:{captcha_token:n?.captchaToken},code_challenge:r,code_challenge_method:i},redirectTo:n?.emailRedirectTo});return this._returnResult({data:{user:null,session:null},error:a})}if(`phone`in e){let{phone:t,options:n}=e,{data:r,error:i}=await N(this.fetch,`POST`,`${this.url}/otp`,{headers:this.headers,body:{phone:t,data:n?.data??{},create_user:n?.shouldCreateUser??!0,gotrue_meta_security:{captcha_token:n?.captchaToken},channel:n?.channel??`sms`}});return this._returnResult({data:{user:null,session:null,messageId:r?.message_id},error:i})}throw new Rn(`You must provide either an email or phone number.`)}catch(e){if(await mr(this.storage,`${this.storageKey}-code-verifier`),j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async verifyOtp(e){try{let t,n;`options`in e&&(t=e.options?.redirectTo,n=e.options?.captchaToken);let{data:r,error:i}=await N(this.fetch,`POST`,`${this.url}/verify`,{headers:this.headers,body:Object.assign(Object.assign({},e),{gotrue_meta_security:{captcha_token:n}}),redirectTo:t,xform:Rr});if(i)throw i;if(!r)throw Error(`An error occurred on token verification.`);let a=r.session,o=r.user;return a?.access_token&&(await this._saveSession(a),await this._notifyAllSubscribers(e.type==`recovery`?`PASSWORD_RECOVERY`:`SIGNED_IN`,a)),this._returnResult({data:{user:o,session:a},error:null})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signInWithSSO(e){try{let t=null,n=null;this.flowType===`pkce`&&([t,n]=await Cr(this.storage,this.storageKey));let r=await N(this.fetch,`POST`,`${this.url}/sso`,{body:Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},`providerId`in e?{provider_id:e.providerId}:null),`domain`in e?{domain:e.domain}:null),{redirect_to:e.options?.redirectTo??void 0}),e?.options?.captchaToken?{gotrue_meta_security:{captcha_token:e.options.captchaToken}}:null),{skip_http_redirect:!0,code_challenge:t,code_challenge_method:n}),headers:this.headers,xform:Vr});return r.data?.url&&M()&&!e.options?.skipBrowserRedirect&&window.location.assign(r.data.url),this._returnResult(r)}catch(e){if(await mr(this.storage,`${this.storageKey}-code-verifier`),j(e))return this._returnResult({data:null,error:e});throw e}}async reauthenticate(){return await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>await this._reauthenticate())}async _reauthenticate(){try{return await this._useSession(async e=>{let{data:{session:t},error:n}=e;if(n)throw n;if(!t)throw new Fn;let{error:r}=await N(this.fetch,`GET`,`${this.url}/reauthenticate`,{headers:this.headers,jwt:t.access_token});return this._returnResult({data:{user:null,session:null},error:r})})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async resend(e){try{let t=`${this.url}/resend`;if(`email`in e){let{email:n,type:r,options:i}=e,{error:a}=await N(this.fetch,`POST`,t,{headers:this.headers,body:{email:n,type:r,gotrue_meta_security:{captcha_token:i?.captchaToken}},redirectTo:i?.emailRedirectTo});return this._returnResult({data:{user:null,session:null},error:a})}else if(`phone`in e){let{phone:n,type:r,options:i}=e,{data:a,error:o}=await N(this.fetch,`POST`,t,{headers:this.headers,body:{phone:n,type:r,gotrue_meta_security:{captcha_token:i?.captchaToken}}});return this._returnResult({data:{user:null,session:null,messageId:a?.message_id},error:o})}throw new Rn(`You must provide either an email or phone number and a type`)}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async getSession(){return await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>this._useSession(async e=>e))}async _acquireLock(e,t){this._debug(`#_acquireLock`,`begin`,e);try{if(this.lockAcquired){let e=this.pendingInLock.length?this.pendingInLock[this.pendingInLock.length-1]:Promise.resolve(),n=(async()=>(await e,await t()))();return this.pendingInLock.push((async()=>{try{await n}catch{}})()),n}return await this.lock(`lock:${this.storageKey}`,e,async()=>{this._debug(`#_acquireLock`,`lock acquired for storage key`,this.storageKey);try{this.lockAcquired=!0;let e=t();for(this.pendingInLock.push((async()=>{try{await e}catch{}})()),await e;this.pendingInLock.length;){let e=[...this.pendingInLock];await Promise.all(e),this.pendingInLock.splice(0,e.length)}return await e}finally{this._debug(`#_acquireLock`,`lock released for storage key`,this.storageKey),this.lockAcquired=!1}})}finally{this._debug(`#_acquireLock`,`end`)}}async _useSession(e){this._debug(`#_useSession`,`begin`);try{return await e(await this.__loadSession())}finally{this._debug(`#_useSession`,`end`)}}async __loadSession(){this._debug(`#__loadSession()`,`begin`),this.lockAcquired||this._debug(`#__loadSession()`,`used outside of an acquired lock!`,Error().stack);try{let e=null,t=await pr(this.storage,this.storageKey);if(this._debug(`#getSession()`,`session from storage`,t),t!==null&&(this._isValidSession(t)?e=t:(this._debug(`#getSession()`,`session from storage is not valid`),await this._removeSession())),!e)return{data:{session:null},error:null};let n=e.expires_at?e.expires_at*1e3-Date.now()<Cn:!1;if(this._debug(`#__loadSession()`,`session has${n?``:` not`} expired`,`expires_at`,e.expires_at),!n){if(this.userStorage){let t=await pr(this.userStorage,this.storageKey+`-user`);t?.user?e.user=t.user:e.user=Ar()}if(this.storage.isServer&&e.user&&!e.user.__isUserNotAvailableProxy){let t={value:this.suppressGetSessionWarning};e.user=jr(e.user,t),t.value&&(this.suppressGetSessionWarning=!0)}return{data:{session:e},error:null}}let{data:r,error:i}=await this._callRefreshToken(e.refresh_token);return i?this._returnResult({data:{session:null},error:i}):this._returnResult({data:{session:r},error:null})}finally{this._debug(`#__loadSession()`,`end`)}}async getUser(e){if(e)return await this._getUser(e);await this.initializePromise;let t=await this._acquireLock(this.lockAcquireTimeout,async()=>await this._getUser());return t.data.user&&(this.suppressGetSessionWarning=!0),t}async _getUser(e){try{return e?await N(this.fetch,`GET`,`${this.url}/user`,{headers:this.headers,jwt:e,xform:Br}):await this._useSession(async e=>{let{data:t,error:n}=e;if(n)throw n;return!t.session?.access_token&&!this.hasCustomAuthorizationHeader?{data:{user:null},error:new Fn}:await N(this.fetch,`GET`,`${this.url}/user`,{headers:this.headers,jwt:t.session?.access_token??void 0,xform:Br})})}catch(e){if(j(e))return In(e)&&(await this._removeSession(),await mr(this.storage,`${this.storageKey}-code-verifier`)),this._returnResult({data:{user:null},error:e});throw e}}async updateUser(e,t={}){return await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>await this._updateUser(e,t))}async _updateUser(e,t={}){try{return await this._useSession(async n=>{let{data:r,error:i}=n;if(i)throw i;if(!r.session)throw new Fn;let a=r.session,o=null,s=null;this.flowType===`pkce`&&e.email!=null&&([o,s]=await Cr(this.storage,this.storageKey));let{data:c,error:l}=await N(this.fetch,`PUT`,`${this.url}/user`,{headers:this.headers,redirectTo:t?.emailRedirectTo,body:Object.assign(Object.assign({},e),{code_challenge:o,code_challenge_method:s}),jwt:a.access_token,xform:Br});if(l)throw l;return a.user=c.user,await this._saveSession(a),await this._notifyAllSubscribers(`USER_UPDATED`,a),this._returnResult({data:{user:a.user},error:null})})}catch(e){if(await mr(this.storage,`${this.storageKey}-code-verifier`),j(e))return this._returnResult({data:{user:null},error:e});throw e}}async setSession(e){return await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>await this._setSession(e))}async _setSession(e){try{if(!e.access_token||!e.refresh_token)throw new Fn;let t=Date.now()/1e3,n=t,r=!0,i=null,{payload:a}=gr(e.access_token);if(a.exp&&(n=a.exp,r=n<=t),r){let{data:t,error:n}=await this._callRefreshToken(e.refresh_token);if(n)return this._returnResult({data:{user:null,session:null},error:n});if(!t)return{data:{user:null,session:null},error:null};i=t}else{let{data:r,error:a}=await this._getUser(e.access_token);if(a)return this._returnResult({data:{user:null,session:null},error:a});i={access_token:e.access_token,refresh_token:e.refresh_token,user:r.user,token_type:`bearer`,expires_in:n-t,expires_at:n},await this._saveSession(i),await this._notifyAllSubscribers(`SIGNED_IN`,i)}return this._returnResult({data:{user:i.user,session:i},error:null})}catch(e){if(j(e))return this._returnResult({data:{session:null,user:null},error:e});throw e}}async refreshSession(e){return await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>await this._refreshSession(e))}async _refreshSession(e){try{return await this._useSession(async t=>{if(!e){let{data:n,error:r}=t;if(r)throw r;e=n.session??void 0}if(!e?.refresh_token)throw new Fn;let{data:n,error:r}=await this._callRefreshToken(e.refresh_token);return r?this._returnResult({data:{user:null,session:null},error:r}):n?this._returnResult({data:{user:n.user,session:n},error:null}):this._returnResult({data:{user:null,session:null},error:null})})}catch(e){if(j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async _getSessionFromURL(e,t){try{if(!M())throw new zn(`No browser detected.`);if(e.error||e.error_description||e.error_code)throw new zn(e.error_description||`Error in URL with unspecified error_description`,{error:e.error||`unspecified_error`,code:e.error_code||`unspecified_code`});switch(t){case`implicit`:if(this.flowType===`pkce`)throw new Vn(`Not a valid PKCE flow url.`);break;case`pkce`:if(this.flowType===`implicit`)throw new zn(`Not a valid implicit grant flow url.`);break;default:}if(t===`pkce`){if(this._debug(`#_initialize()`,`begin`,`is PKCE flow`,!0),!e.code)throw new Vn(`No code detected.`);let{data:t,error:n}=await this._exchangeCodeForSession(e.code);if(n)throw n;let r=new URL(window.location.href);return r.searchParams.delete(`code`),window.history.replaceState(window.history.state,``,r.toString()),{data:{session:t.session,redirectType:null},error:null}}let{provider_token:n,provider_refresh_token:r,access_token:i,refresh_token:a,expires_in:o,expires_at:s,token_type:c}=e;if(!i||!o||!a||!c)throw new zn(`No session defined in URL`);let l=Math.round(Date.now()/1e3),u=parseInt(o),d=l+u;s&&(d=parseInt(s));let f=d-l;f*1e3<=3e4&&console.warn(`@supabase/gotrue-js: Session as retrieved from URL expires in ${f}s, should have been closer to ${u}s`);let p=d-u;l-p>=120?console.warn(`@supabase/gotrue-js: Session as retrieved from URL was issued over 120s ago, URL could be stale`,p,d,l):l-p<0&&console.warn(`@supabase/gotrue-js: Session as retrieved from URL was issued in the future? Check the device clock for skew`,p,d,l);let{data:m,error:h}=await this._getUser(i);if(h)throw h;let g={provider_token:n,provider_refresh_token:r,access_token:i,expires_in:u,expires_at:d,refresh_token:a,token_type:c,user:m.user};return window.location.hash=``,this._debug(`#_getSessionFromURL()`,`clearing window.location.hash`),this._returnResult({data:{session:g,redirectType:e.type},error:null})}catch(e){if(j(e))return this._returnResult({data:{session:null,redirectType:null},error:e});throw e}}_isImplicitGrantCallback(e){return typeof this.detectSessionInUrl==`function`?this.detectSessionInUrl(new URL(window.location.href),e):!!(e.access_token||e.error_description)}async _isPKCECallback(e){let t=await pr(this.storage,`${this.storageKey}-code-verifier`);return!!(e.code&&t)}async signOut(e={scope:`global`}){return await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>await this._signOut(e))}async _signOut({scope:e}={scope:`global`}){return await this._useSession(async t=>{let{data:n,error:r}=t;if(r&&!In(r))return this._returnResult({error:r});let i=n.session?.access_token;if(i){let{error:t}=await this.admin.signOut(i,e);if(t&&!(Mn(t)&&(t.status===404||t.status===401||t.status===403)||In(t)))return this._returnResult({error:t})}return e!==`others`&&(await this._removeSession(),await mr(this.storage,`${this.storageKey}-code-verifier`)),this._returnResult({error:null})})}onAuthStateChange(e){let t=or(),n={id:t,callback:e,unsubscribe:()=>{this._debug(`#unsubscribe()`,`state change callback with id removed`,t),this.stateChangeEmitters.delete(t)}};return this._debug(`#onAuthStateChange()`,`registered callback with id`,t),this.stateChangeEmitters.set(t,n),(async()=>{await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>{this._emitInitialSession(t)})})(),{data:{subscription:n}}}async _emitInitialSession(e){return await this._useSession(async t=>{try{let{data:{session:n},error:r}=t;if(r)throw r;await this.stateChangeEmitters.get(e)?.callback(`INITIAL_SESSION`,n),this._debug(`INITIAL_SESSION`,`callback id`,e,`session`,n)}catch(t){await this.stateChangeEmitters.get(e)?.callback(`INITIAL_SESSION`,null),this._debug(`INITIAL_SESSION`,`callback id`,e,`error`,t),console.error(t)}})}async resetPasswordForEmail(e,t={}){let n=null,r=null;this.flowType===`pkce`&&([n,r]=await Cr(this.storage,this.storageKey,!0));try{return await N(this.fetch,`POST`,`${this.url}/recover`,{body:{email:e,code_challenge:n,code_challenge_method:r,gotrue_meta_security:{captcha_token:t.captchaToken}},headers:this.headers,redirectTo:t.redirectTo})}catch(e){if(await mr(this.storage,`${this.storageKey}-code-verifier`),j(e))return this._returnResult({data:null,error:e});throw e}}async getUserIdentities(){try{let{data:e,error:t}=await this.getUser();if(t)throw t;return this._returnResult({data:{identities:e.user.identities??[]},error:null})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async linkIdentity(e){return`token`in e?this.linkIdentityIdToken(e):this.linkIdentityOAuth(e)}async linkIdentityOAuth(e){try{let{data:t,error:n}=await this._useSession(async t=>{let{data:n,error:r}=t;if(r)throw r;let i=await this._getUrlForProvider(`${this.url}/user/identities/authorize`,e.provider,{redirectTo:e.options?.redirectTo,scopes:e.options?.scopes,queryParams:e.options?.queryParams,skipBrowserRedirect:!0});return await N(this.fetch,`GET`,i,{headers:this.headers,jwt:n.session?.access_token??void 0})});if(n)throw n;return M()&&!e.options?.skipBrowserRedirect&&window.location.assign(t?.url),this._returnResult({data:{provider:e.provider,url:t?.url},error:null})}catch(t){if(j(t))return this._returnResult({data:{provider:e.provider,url:null},error:t});throw t}}async linkIdentityIdToken(e){return await this._useSession(async t=>{try{let{error:n,data:{session:r}}=t;if(n)throw n;let{options:i,provider:a,token:o,access_token:s,nonce:c}=e,{data:l,error:u}=await N(this.fetch,`POST`,`${this.url}/token?grant_type=id_token`,{headers:this.headers,jwt:r?.access_token??void 0,body:{provider:a,id_token:o,access_token:s,nonce:c,link_identity:!0,gotrue_meta_security:{captcha_token:i?.captchaToken}},xform:Rr});return u?this._returnResult({data:{user:null,session:null},error:u}):!l||!l.session||!l.user?this._returnResult({data:{user:null,session:null},error:new Ln}):(l.session&&(await this._saveSession(l.session),await this._notifyAllSubscribers(`USER_UPDATED`,l.session)),this._returnResult({data:l,error:u}))}catch(e){if(await mr(this.storage,`${this.storageKey}-code-verifier`),j(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}})}async unlinkIdentity(e){try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)throw r;return await N(this.fetch,`DELETE`,`${this.url}/user/identities/${e.identity_id}`,{headers:this.headers,jwt:n.session?.access_token??void 0})})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async _refreshAccessToken(e){let t=`#_refreshAccessToken(${e.substring(0,5)}...)`;this._debug(t,`begin`);try{let n=Date.now();return await vr(async n=>(n>0&&await _r(200*2**(n-1)),this._debug(t,`refreshing attempt`,n),await N(this.fetch,`POST`,`${this.url}/token?grant_type=refresh_token`,{body:{refresh_token:e},headers:this.headers,xform:Rr})),(e,t)=>{let r=200*2**e;return t&&Wn(t)&&Date.now()+r-n<3e4})}catch(e){if(this._debug(t,`error`,e),j(e))return this._returnResult({data:{session:null,user:null},error:e});throw e}finally{this._debug(t,`end`)}}_isValidSession(e){return typeof e==`object`&&!!e&&`access_token`in e&&`refresh_token`in e&&`expires_at`in e}async _handleProviderSignIn(e,t){let n=await this._getUrlForProvider(`${this.url}/authorize`,e,{redirectTo:t.redirectTo,scopes:t.scopes,queryParams:t.queryParams});return this._debug(`#_handleProviderSignIn()`,`provider`,e,`options`,t,`url`,n),M()&&!t.skipBrowserRedirect&&window.location.assign(n),{data:{provider:e,url:n},error:null}}async _recoverAndRefresh(){let e=`#_recoverAndRefresh()`;this._debug(e,`begin`);try{let t=await pr(this.storage,this.storageKey);if(t&&this.userStorage){let e=await pr(this.userStorage,this.storageKey+`-user`);!this.storage.isServer&&Object.is(this.storage,this.userStorage)&&!e&&(e={user:t.user},await fr(this.userStorage,this.storageKey+`-user`,e)),t.user=e?.user??Ar()}else if(t&&!t.user&&!t.user){let e=await pr(this.storage,this.storageKey+`-user`);e&&e?.user?(t.user=e.user,await mr(this.storage,this.storageKey+`-user`),await fr(this.storage,this.storageKey,t)):t.user=Ar()}if(this._debug(e,`session from storage`,t),!this._isValidSession(t)){this._debug(e,`session is not valid`),t!==null&&await this._removeSession();return}let n=(t.expires_at??1/0)*1e3-Date.now()<Cn;if(this._debug(e,`session has${n?``:` not`} expired with margin of ${Cn}s`),n){if(this.autoRefreshToken&&t.refresh_token){let{error:n}=await this._callRefreshToken(t.refresh_token);n&&(console.error(n),Wn(n)||(this._debug(e,`refresh failed with a non-retryable error, removing the session`,n),await this._removeSession()))}}else if(t.user&&t.user.__isUserNotAvailableProxy===!0)try{let{data:n,error:r}=await this._getUser(t.access_token);!r&&n?.user?(t.user=n.user,await this._saveSession(t),await this._notifyAllSubscribers(`SIGNED_IN`,t)):this._debug(e,`could not get user data, skipping SIGNED_IN notification`)}catch(t){console.error(`Error getting user data:`,t),this._debug(e,`error getting user data, skipping SIGNED_IN notification`,t)}else await this._notifyAllSubscribers(`SIGNED_IN`,t)}catch(t){this._debug(e,`error`,t),console.error(t);return}finally{this._debug(e,`end`)}}async _callRefreshToken(e){var t,n;if(!e)throw new Fn;if(this.refreshingDeferred)return this.refreshingDeferred.promise;let r=`#_callRefreshToken(${e.substring(0,5)}...)`;this._debug(r,`begin`);try{this.refreshingDeferred=new hr;let{data:t,error:n}=await this._refreshAccessToken(e);if(n)throw n;if(!t.session)throw new Fn;await this._saveSession(t.session),await this._notifyAllSubscribers(`TOKEN_REFRESHED`,t.session);let r={data:t.session,error:null};return this.refreshingDeferred.resolve(r),r}catch(e){if(this._debug(r,`error`,e),j(e)){let n={data:null,error:e};return Wn(e)||await this._removeSession(),(t=this.refreshingDeferred)==null||t.resolve(n),n}throw(n=this.refreshingDeferred)==null||n.reject(e),e}finally{this.refreshingDeferred=null,this._debug(r,`end`)}}async _notifyAllSubscribers(e,t,n=!0){let r=`#_notifyAllSubscribers(${e})`;this._debug(r,`begin`,t,`broadcast = ${n}`);try{this.broadcastChannel&&n&&this.broadcastChannel.postMessage({event:e,session:t});let r=[],i=Array.from(this.stateChangeEmitters.values()).map(async n=>{try{await n.callback(e,t)}catch(e){r.push(e)}});if(await Promise.all(i),r.length>0){for(let e=0;e<r.length;e+=1)console.error(r[e]);throw r[0]}}finally{this._debug(r,`end`)}}async _saveSession(e){this._debug(`#_saveSession()`,e),this.suppressGetSessionWarning=!0,await mr(this.storage,`${this.storageKey}-code-verifier`);let t=Object.assign({},e),n=t.user&&t.user.__isUserNotAvailableProxy===!0;if(this.userStorage){!n&&t.user&&await fr(this.userStorage,this.storageKey+`-user`,{user:t.user});let e=Object.assign({},t);delete e.user;let r=Mr(e);await fr(this.storage,this.storageKey,r)}else{let e=Mr(t);await fr(this.storage,this.storageKey,e)}}async _removeSession(){this._debug(`#_removeSession()`),this.suppressGetSessionWarning=!1,await mr(this.storage,this.storageKey),await mr(this.storage,this.storageKey+`-code-verifier`),await mr(this.storage,this.storageKey+`-user`),this.userStorage&&await mr(this.userStorage,this.storageKey+`-user`),await this._notifyAllSubscribers(`SIGNED_OUT`,null)}_removeVisibilityChangedCallback(){this._debug(`#_removeVisibilityChangedCallback()`);let e=this.visibilityChangedCallback;this.visibilityChangedCallback=null;try{e&&M()&&window!=null&&window.removeEventListener&&window.removeEventListener(`visibilitychange`,e)}catch(e){console.error(`removing visibilitychange callback failed`,e)}}async _startAutoRefresh(){await this._stopAutoRefresh(),this._debug(`#_startAutoRefresh()`);let e=setInterval(()=>this._autoRefreshTokenTick(),Sn);this.autoRefreshTicker=e,e&&typeof e==`object`&&typeof e.unref==`function`?e.unref():typeof Deno<`u`&&typeof Deno.unrefTimer==`function`&&Deno.unrefTimer(e);let t=setTimeout(async()=>{await this.initializePromise,await this._autoRefreshTokenTick()},0);this.autoRefreshTickTimeout=t,t&&typeof t==`object`&&typeof t.unref==`function`?t.unref():typeof Deno<`u`&&typeof Deno.unrefTimer==`function`&&Deno.unrefTimer(t)}async _stopAutoRefresh(){this._debug(`#_stopAutoRefresh()`);let e=this.autoRefreshTicker;this.autoRefreshTicker=null,e&&clearInterval(e);let t=this.autoRefreshTickTimeout;this.autoRefreshTickTimeout=null,t&&clearTimeout(t)}async startAutoRefresh(){this._removeVisibilityChangedCallback(),await this._startAutoRefresh()}async stopAutoRefresh(){this._removeVisibilityChangedCallback(),await this._stopAutoRefresh()}async _autoRefreshTokenTick(){this._debug(`#_autoRefreshTokenTick()`,`begin`);try{await this._acquireLock(0,async()=>{try{let e=Date.now();try{return await this._useSession(async t=>{let{data:{session:n}}=t;if(!n||!n.refresh_token||!n.expires_at){this._debug(`#_autoRefreshTokenTick()`,`no session`);return}let r=Math.floor((n.expires_at*1e3-e)/Sn);this._debug(`#_autoRefreshTokenTick()`,`access token expires in ${r} ticks, a tick lasts ${Sn}ms, refresh threshold is 3 ticks`),r<=3&&await this._callRefreshToken(n.refresh_token)})}catch(e){console.error(`Auto refresh tick failed with error. This is likely a transient error.`,e)}}finally{this._debug(`#_autoRefreshTokenTick()`,`end`)}})}catch(e){if(e.isAcquireTimeout||e instanceof Yr)this._debug(`auto refresh token tick lock not available`);else throw e}}async _handleVisibilityChange(){if(this._debug(`#_handleVisibilityChange()`),!M()||!(window!=null&&window.addEventListener))return this.autoRefreshToken&&this.startAutoRefresh(),!1;try{this.visibilityChangedCallback=async()=>{try{await this._onVisibilityChanged(!1)}catch(e){this._debug(`#visibilityChangedCallback`,`error`,e)}},window==null||window.addEventListener(`visibilitychange`,this.visibilityChangedCallback),await this._onVisibilityChanged(!0)}catch(e){console.error(`_handleVisibilityChange`,e)}}async _onVisibilityChanged(e){let t=`#_onVisibilityChanged(${e})`;this._debug(t,`visibilityState`,document.visibilityState),document.visibilityState===`visible`?(this.autoRefreshToken&&this._startAutoRefresh(),e||(await this.initializePromise,await this._acquireLock(this.lockAcquireTimeout,async()=>{if(document.visibilityState!==`visible`){this._debug(t,`acquired the lock to recover the session, but the browser visibilityState is no longer visible, aborting`);return}await this._recoverAndRefresh()}))):document.visibilityState===`hidden`&&this.autoRefreshToken&&this._stopAutoRefresh()}async _getUrlForProvider(e,t,n){let r=[`provider=${encodeURIComponent(t)}`];if(n?.redirectTo&&r.push(`redirect_to=${encodeURIComponent(n.redirectTo)}`),n?.scopes&&r.push(`scopes=${encodeURIComponent(n.scopes)}`),this.flowType===`pkce`){let[e,t]=await Cr(this.storage,this.storageKey),n=new URLSearchParams({code_challenge:`${encodeURIComponent(e)}`,code_challenge_method:`${encodeURIComponent(t)}`});r.push(n.toString())}if(n?.queryParams){let e=new URLSearchParams(n.queryParams);r.push(e.toString())}return n?.skipBrowserRedirect&&r.push(`skip_http_redirect=${n.skipBrowserRedirect}`),`${e}?${r.join(`&`)}`}async _unenroll(e){try{return await this._useSession(async t=>{let{data:n,error:r}=t;return r?this._returnResult({data:null,error:r}):await N(this.fetch,`DELETE`,`${this.url}/factors/${e.factorId}`,{headers:this.headers,jwt:n?.session?.access_token})})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async _enroll(e){try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let i=Object.assign({friendly_name:e.friendlyName,factor_type:e.factorType},e.factorType===`phone`?{phone:e.phone}:e.factorType===`totp`?{issuer:e.issuer}:{}),{data:a,error:o}=await N(this.fetch,`POST`,`${this.url}/factors`,{body:i,headers:this.headers,jwt:n?.session?.access_token});return o?this._returnResult({data:null,error:o}):(e.factorType===`totp`&&a.type===`totp`&&a?.totp?.qr_code&&(a.totp.qr_code=`data:image/svg+xml;utf-8,${a.totp.qr_code}`),this._returnResult({data:a,error:null}))})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async _verify(e){return this._acquireLock(this.lockAcquireTimeout,async()=>{try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let i=Object.assign({challenge_id:e.challengeId},`webauthn`in e?{webauthn:Object.assign(Object.assign({},e.webauthn),{credential_response:e.webauthn.type===`create`?li(e.webauthn.credential_response):ui(e.webauthn.credential_response)})}:{code:e.code}),{data:a,error:o}=await N(this.fetch,`POST`,`${this.url}/factors/${e.factorId}/verify`,{body:i,headers:this.headers,jwt:n?.session?.access_token});return o?this._returnResult({data:null,error:o}):(await this._saveSession(Object.assign({expires_at:Math.round(Date.now()/1e3)+a.expires_in},a)),await this._notifyAllSubscribers(`MFA_CHALLENGE_VERIFIED`,a),this._returnResult({data:a,error:o}))})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}})}async _challenge(e){return this._acquireLock(this.lockAcquireTimeout,async()=>{try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let i=await N(this.fetch,`POST`,`${this.url}/factors/${e.factorId}/challenge`,{body:e,headers:this.headers,jwt:n?.session?.access_token});if(i.error)return i;let{data:a}=i;if(a.type!==`webauthn`)return{data:a,error:null};switch(a.webauthn.type){case`create`:return{data:Object.assign(Object.assign({},a),{webauthn:Object.assign(Object.assign({},a.webauthn),{credential_options:Object.assign(Object.assign({},a.webauthn.credential_options),{publicKey:si(a.webauthn.credential_options.publicKey)})})}),error:null};case`request`:return{data:Object.assign(Object.assign({},a),{webauthn:Object.assign(Object.assign({},a.webauthn),{credential_options:Object.assign(Object.assign({},a.webauthn.credential_options),{publicKey:ci(a.webauthn.credential_options.publicKey)})})}),error:null}}})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}})}async _challengeAndVerify(e){let{data:t,error:n}=await this._challenge({factorId:e.factorId});return n?this._returnResult({data:null,error:n}):await this._verify({factorId:e.factorId,challengeId:t.id,code:e.code})}async _listFactors(){let{data:{user:e},error:t}=await this.getUser();if(t)return{data:null,error:t};let n={all:[],phone:[],totp:[],webauthn:[]};for(let t of e?.factors??[])n.all.push(t),t.status===`verified`&&n[t.factor_type].push(t);return{data:n,error:null}}async _getAuthenticatorAssuranceLevel(e){if(e)try{let{payload:t}=gr(e),n=null;t.aal&&(n=t.aal);let r=n,{data:{user:i},error:a}=await this.getUser(e);if(a)return this._returnResult({data:null,error:a});((i?.factors)?.filter(e=>e.status===`verified`)??[]).length>0&&(r=`aal2`);let o=t.amr||[];return{data:{currentLevel:n,nextLevel:r,currentAuthenticationMethods:o},error:null}}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}let{data:{session:t},error:n}=await this.getSession();if(n)return this._returnResult({data:null,error:n});if(!t)return{data:{currentLevel:null,nextLevel:null,currentAuthenticationMethods:[]},error:null};let{payload:r}=gr(t.access_token),i=null;r.aal&&(i=r.aal);let a=i;(t.user.factors?.filter(e=>e.status===`verified`)??[]).length>0&&(a=`aal2`);let o=r.amr||[];return{data:{currentLevel:i,nextLevel:a,currentAuthenticationMethods:o},error:null}}async _getAuthorizationDetails(e){try{return await this._useSession(async t=>{let{data:{session:n},error:r}=t;return r?this._returnResult({data:null,error:r}):n?await N(this.fetch,`GET`,`${this.url}/oauth/authorizations/${e}`,{headers:this.headers,jwt:n.access_token,xform:e=>({data:e,error:null})}):this._returnResult({data:null,error:new Fn})})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async _approveAuthorization(e,t){try{return await this._useSession(async n=>{let{data:{session:r},error:i}=n;if(i)return this._returnResult({data:null,error:i});if(!r)return this._returnResult({data:null,error:new Fn});let a=await N(this.fetch,`POST`,`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:r.access_token,body:{action:`approve`},xform:e=>({data:e,error:null})});return a.data&&a.data.redirect_url&&M()&&!t?.skipBrowserRedirect&&window.location.assign(a.data.redirect_url),a})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async _denyAuthorization(e,t){try{return await this._useSession(async n=>{let{data:{session:r},error:i}=n;if(i)return this._returnResult({data:null,error:i});if(!r)return this._returnResult({data:null,error:new Fn});let a=await N(this.fetch,`POST`,`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:r.access_token,body:{action:`deny`},xform:e=>({data:e,error:null})});return a.data&&a.data.redirect_url&&M()&&!t?.skipBrowserRedirect&&window.location.assign(a.data.redirect_url),a})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async _listOAuthGrants(){try{return await this._useSession(async e=>{let{data:{session:t},error:n}=e;return n?this._returnResult({data:null,error:n}):t?await N(this.fetch,`GET`,`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:t.access_token,xform:e=>({data:e,error:null})}):this._returnResult({data:null,error:new Fn})})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async _revokeOAuthGrant(e){try{return await this._useSession(async t=>{let{data:{session:n},error:r}=t;return r?this._returnResult({data:null,error:r}):n?(await N(this.fetch,`DELETE`,`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:n.access_token,query:{client_id:e.clientId},noResolveJson:!0}),{data:{},error:null}):this._returnResult({data:null,error:new Fn})})}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}async fetchJwk(e,t={keys:[]}){let n=t.keys.find(t=>t.kid===e);if(n)return n;let r=Date.now();if(n=this.jwks.keys.find(t=>t.kid===e),n&&this.jwks_cached_at+6e5>r)return n;let{data:i,error:a}=await N(this.fetch,`GET`,`${this.url}/.well-known/jwks.json`,{headers:this.headers});if(a)throw a;return!i.keys||i.keys.length===0||(this.jwks=i,this.jwks_cached_at=r,n=i.keys.find(t=>t.kid===e),!n)?null:n}async getClaims(e,t={}){try{let n=e;if(!n){let{data:e,error:t}=await this.getSession();if(t||!e.session)return this._returnResult({data:null,error:t});n=e.session.access_token}let{header:r,payload:i,signature:a,raw:{header:o,payload:s}}=gr(n);t?.allowExpired||Er(i.exp);let c=!r.alg||r.alg.startsWith(`HS`)||!r.kid||!(`crypto`in globalThis&&`subtle`in globalThis.crypto)?null:await this.fetchJwk(r.kid,t?.keys?{keys:t.keys}:t?.jwks);if(!c){let{error:e}=await this.getUser(n);if(e)throw e;return{data:{claims:i,header:r,signature:a},error:null}}let l=Dr(r.alg),u=await crypto.subtle.importKey(`jwk`,c,l,!0,[`verify`]);if(!await crypto.subtle.verify(l,u,a,rr(`${o}.${s}`)))throw new Kn(`Invalid JWT signature`);return{data:{claims:i,header:r,signature:a},error:null}}catch(e){if(j(e))return this._returnResult({data:null,error:e});throw e}}};wi.nextInstanceID={};var Ti=wi,Ei=`2.101.1`,Di=``;Di=typeof Deno<`u`?`deno`:typeof document<`u`?`web`:typeof navigator<`u`&&navigator.product===`ReactNative`?`react-native`:`node`;var Oi={headers:{"X-Client-Info":`supabase-js-${Di}/${Ei}`}},ki={schema:`public`},Ai={autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,flowType:`implicit`},ji={};function Mi(e){"@babel/helpers - typeof";return Mi=typeof Symbol==`function`&&typeof Symbol.iterator==`symbol`?function(e){return typeof e}:function(e){return e&&typeof Symbol==`function`&&e.constructor===Symbol&&e!==Symbol.prototype?`symbol`:typeof e},Mi(e)}function Ni(e,t){if(Mi(e)!=`object`||!e)return e;var n=e[Symbol.toPrimitive];if(n!==void 0){var r=n.call(e,t||`default`);if(Mi(r)!=`object`)return r;throw TypeError(`@@toPrimitive must return a primitive value.`)}return(t===`string`?String:Number)(e)}function Pi(e){var t=Ni(e,`string`);return Mi(t)==`symbol`?t:t+``}function Fi(e,t,n){return(t=Pi(t))in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function Ii(e,t){var n=Object.keys(e);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(e);t&&(r=r.filter(function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable})),n.push.apply(n,r)}return n}function F(e){for(var t=1;t<arguments.length;t++){var n=arguments[t]==null?{}:arguments[t];t%2?Ii(Object(n),!0).forEach(function(t){Fi(e,t,n[t])}):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(n)):Ii(Object(n)).forEach(function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(n,t))})}return e}var I=e=>e?(...t)=>e(...t):(...e)=>fetch(...e),L=()=>Headers,Li=(e,t,n)=>{let r=I(n),i=L();return async(n,a)=>{let o=await t()??e,s=new i(a?.headers);return s.has(`apikey`)||s.set(`apikey`,e),s.has(`Authorization`)||s.set(`Authorization`,`Bearer ${o}`),r(n,F(F({},a),{},{headers:s}))}};function Ri(e){return e.endsWith(`/`)?e:e+`/`}function zi(e,t){let{db:n,auth:r,realtime:i,global:a}=e,{db:o,auth:s,realtime:c,global:l}=t,u={db:F(F({},o),n),auth:F(F({},s),r),realtime:F(F({},c),i),storage:{},global:F(F(F({},l),a),{},{headers:F(F({},l?.headers??{}),a?.headers??{})}),accessToken:async()=>``};return e.accessToken?u.accessToken=e.accessToken:delete u.accessToken,u}function Bi(e){let t=e?.trim();if(!t)throw Error(`supabaseUrl is required.`);if(!t.match(/^https?:\/\//i))throw Error(`Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.`);try{return new URL(Ri(t))}catch{throw Error(`Invalid supabaseUrl: Provided URL is malformed.`)}}var Vi=class extends Ti{constructor(e){super(e)}},Hi=class{constructor(e,t,n){this.supabaseUrl=e,this.supabaseKey=t;let r=Bi(e);if(!t)throw Error(`supabaseKey is required.`);this.realtimeUrl=new URL(`realtime/v1`,r),this.realtimeUrl.protocol=this.realtimeUrl.protocol.replace(`http`,`ws`),this.authUrl=new URL(`auth/v1`,r),this.storageUrl=new URL(`storage/v1`,r),this.functionsUrl=new URL(`functions/v1`,r);let i=`sb-${r.hostname.split(`.`)[0]}-auth-token`,a={db:ki,realtime:ji,auth:F(F({},Ai),{},{storageKey:i}),global:Oi},o=zi(n??{},a);this.storageKey=o.auth.storageKey??``,this.headers=o.global.headers??{},o.accessToken?(this.accessToken=o.accessToken,this.auth=new Proxy({},{get:(e,t)=>{throw Error(`@supabase/supabase-js: Supabase Client is configured with the accessToken option, accessing supabase.auth.${String(t)} is not possible`)}})):this.auth=this._initSupabaseAuthClient(o.auth??{},this.headers,o.global.fetch),this.fetch=Li(t,this._getAccessToken.bind(this),o.global.fetch),this.realtime=this._initRealtimeClient(F({headers:this.headers,accessToken:this._getAccessToken.bind(this)},o.realtime)),this.accessToken&&Promise.resolve(this.accessToken()).then(e=>this.realtime.setAuth(e)).catch(e=>console.warn(`Failed to set initial Realtime auth token:`,e)),this.rest=new _e(new URL(`rest/v1`,r).href,{headers:this.headers,schema:o.db.schema,fetch:this.fetch,timeout:o.db.timeout,urlLengthLimit:o.db.urlLengthLimit}),this.storage=new bn(this.storageUrl.href,this.headers,this.fetch,n?.storage),o.accessToken||this._listenForAuthEvents()}get functions(){return new se(this.functionsUrl.href,{headers:this.headers,customFetch:this.fetch})}from(e){return this.rest.from(e)}schema(e){return this.rest.schema(e)}rpc(e,t={},n={head:!1,get:!1,count:void 0}){return this.rest.rpc(e,t,n)}channel(e,t={config:{}}){return this.realtime.channel(e,t)}getChannels(){return this.realtime.getChannels()}removeChannel(e){return this.realtime.removeChannel(e)}removeAllChannels(){return this.realtime.removeAllChannels()}async _getAccessToken(){var e=this;if(e.accessToken)return await e.accessToken();let{data:t}=await e.auth.getSession();return t.session?.access_token??e.supabaseKey}_initSupabaseAuthClient({autoRefreshToken:e,persistSession:t,detectSessionInUrl:n,storage:r,userStorage:i,storageKey:a,flowType:o,lock:s,debug:c,throwOnError:l},u,d){let f={Authorization:`Bearer ${this.supabaseKey}`,apikey:`${this.supabaseKey}`};return new Vi({url:this.authUrl.href,headers:F(F({},f),u),storageKey:a,autoRefreshToken:e,persistSession:t,detectSessionInUrl:n,storage:r,userStorage:i,flowType:o,lock:s,debug:c,throwOnError:l,fetch:d,hasCustomAuthorizationHeader:Object.keys(this.headers).some(e=>e.toLowerCase()===`authorization`)})}_initRealtimeClient(e){return new St(this.realtimeUrl.href,F(F({},e),{},{params:F(F({},{apikey:this.supabaseKey}),e?.params)}))}_listenForAuthEvents(){return this.auth.onAuthStateChange((e,t)=>{this._handleTokenChanged(e,`CLIENT`,t?.access_token)})}_handleTokenChanged(e,t,n){(e===`TOKEN_REFRESHED`||e===`SIGNED_IN`)&&this.changedAccessToken!==n?(this.changedAccessToken=n,this.realtime.setAuth(n)):e===`SIGNED_OUT`&&(this.realtime.setAuth(),t==`STORAGE`&&this.auth.signOut(),this.changedAccessToken=void 0)}},Ui=(e,t,n)=>new Hi(e,t,n);function Wi(){if(typeof window<`u`)return!1;let e=globalThis.process;if(!e)return!1;let t=e.version;if(t==null)return!1;let n=t.match(/^v(\d+)\./);return n?parseInt(n[1],10)<=18:!1}Wi()&&console.warn(`⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217`);var Gi=Ui(`https://blvfmytswkxfrgcwpaye.supabase.co`,`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsdmZteXRzd2t4ZnJnY3dwYXllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTE2MTEsImV4cCI6MjA5MTA4NzYxMX0.N7dsRfzPsSOhgfYzioa_6Jh-IiA7eR0o47Uv3Ipg6mg`),Ki=(...e)=>e.filter((e,t,n)=>!!e&&e.trim()!==``&&n.indexOf(e)===t).join(` `).trim(),qi=e=>e.replace(/([a-z0-9])([A-Z])/g,`$1-$2`).toLowerCase(),Ji=e=>e.replace(/^([A-Z])|[\s-_]+(\w)/g,(e,t,n)=>n?n.toUpperCase():t.toLowerCase()),Yi=e=>{let t=Ji(e);return t.charAt(0).toUpperCase()+t.slice(1)},Xi={xmlns:`http://www.w3.org/2000/svg`,width:24,height:24,viewBox:`0 0 24 24`,fill:`none`,stroke:`currentColor`,strokeWidth:2,strokeLinecap:`round`,strokeLinejoin:`round`},Zi=e=>{for(let t in e)if(t.startsWith(`aria-`)||t===`role`||t===`title`)return!0;return!1},Qi=(0,_.createContext)({}),$i=()=>(0,_.useContext)(Qi),ea=(0,_.forwardRef)(({color:e,size:t,strokeWidth:n,absoluteStrokeWidth:r,className:i=``,children:a,iconNode:o,...s},c)=>{let{size:l=24,strokeWidth:u=2,absoluteStrokeWidth:d=!1,color:f=`currentColor`,className:p=``}=$i()??{},m=r??d?Number(n??u)*24/Number(t??l):n??u;return(0,_.createElement)(`svg`,{ref:c,...Xi,width:t??l??Xi.width,height:t??l??Xi.height,stroke:e??f,strokeWidth:m,className:Ki(`lucide`,p,i),...!a&&!Zi(s)&&{"aria-hidden":`true`},...s},[...o.map(([e,t])=>(0,_.createElement)(e,t)),...Array.isArray(a)?a:[a]])}),ta=(e,t)=>{let n=(0,_.forwardRef)(({className:n,...r},i)=>(0,_.createElement)(ea,{ref:i,iconNode:t,className:Ki(`lucide-${qi(Yi(e))}`,`lucide-${e}`,n),...r}));return n.displayName=Yi(e),n},na=ta(`activity`,[[`path`,{d:`M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2`,key:`169zse`}]]),ra=ta(`calendar`,[[`path`,{d:`M8 2v4`,key:`1cmpym`}],[`path`,{d:`M16 2v4`,key:`4m81vk`}],[`rect`,{width:`18`,height:`18`,x:`3`,y:`4`,rx:`2`,key:`1hopcy`}],[`path`,{d:`M3 10h18`,key:`8toen8`}]]),ia=ta(`clock`,[[`circle`,{cx:`12`,cy:`12`,r:`10`,key:`1mglay`}],[`path`,{d:`M12 6v6l4 2`,key:`mmk7yg`}]]),aa=ta(`download`,[[`path`,{d:`M12 15V3`,key:`m9g1x1`}],[`path`,{d:`M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4`,key:`ih7n3h`}],[`path`,{d:`m7 10 5 5 5-5`,key:`brsn70`}]]),oa=ta(`file-text`,[[`path`,{d:`M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z`,key:`1oefj6`}],[`path`,{d:`M14 2v5a1 1 0 0 0 1 1h5`,key:`wfsgrz`}],[`path`,{d:`M10 9H8`,key:`b1mrlr`}],[`path`,{d:`M16 13H8`,key:`t4e002`}],[`path`,{d:`M16 17H8`,key:`z1uh3a`}]]),sa=ta(`log-out`,[[`path`,{d:`m16 17 5-5-5-5`,key:`1bji2h`}],[`path`,{d:`M21 12H9`,key:`dn1m92`}],[`path`,{d:`M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4`,key:`1uf3rs`}]]),ca=ta(`printer`,[[`path`,{d:`M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2`,key:`143wyd`}],[`path`,{d:`M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6`,key:`1itne7`}],[`rect`,{x:`6`,y:`14`,width:`12`,height:`8`,rx:`1`,key:`1ue0tg`}]]),R=ta(`settings`,[[`path`,{d:`M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915`,key:`1i5ecw`}],[`circle`,{cx:`12`,cy:`12`,r:`3`,key:`1v7zrd`}]]),la=ta(`users`,[[`path`,{d:`M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2`,key:`1yyitq`}],[`path`,{d:`M16 3.128a4 4 0 0 1 0 7.744`,key:`16gr8j`}],[`path`,{d:`M22 21v-2a4 4 0 0 0-3-3.87`,key:`kshegd`}],[`circle`,{cx:`9`,cy:`7`,r:`4`,key:`nufk8`}]]),ua=o((e=>{var t=Symbol.for(`react.transitional.element`),n=Symbol.for(`react.fragment`);function r(e,n,r){var i=null;if(r!==void 0&&(i=``+r),n.key!==void 0&&(i=``+n.key),`key`in n)for(var a in r={},n)a!==`key`&&(r[a]=n[a]);else r=n;return n=r.ref,{$$typeof:t,type:e,key:i,ref:n===void 0?null:n,props:r}}e.Fragment=n,e.jsx=r,e.jsxs=r})),z=o(((e,t)=>{t.exports=ua()}))(),da=`1|Moh.Rifani, S.Hut|Kepala Dinas|197208251997031004|260386|fannykoetai72@gmail.com||
-
 2|Moh.Rifani, S.Hut|Sekretaris|197208251997031004|242009|fannykoetai72@gmail.com|Sekretariat|
-
 3|Ahsun Inayati, SP, MP|Pelaksana PNS|197912162005012022|499391|ahsuninayati@kutaikartanegarakab.go.id|Sekretariat|
-
 4|Zaiminar Rusnani, SE, M.Si|Pelaksana PNS|197412202003122006|286322|zaiminar@gmail.com|Sekretariat|
-
 5|Achmad Akbar, S.Sos, M.Si|Pelaksana PNS|198307012009021001|556922|punyaakbar409@gmail.com|Sekretariat|
-
 6|E.Achmad Gozali, SP|Admin|198209212010011021|549156|e.achmadgozali@yahoo.co.id|Sekretariat|
-
 7|Emmy Aryani, SE|Pelaksana PNS|197411192008012011|397185|emmydayang18@gmail.com|Sekretariat|
-
 8|Ida Yuspa Sari, SP|Pelaksana PNS|197705312009022001|469202|yuspasariida@gmail.com|Sekretariat|
-
 9|Iwan Priansyah, SP|Pelaksana PNS|198309272010011013|429960|priansyahiwan@gmail.com|Sekretariat|
-
 10|John Laurens Barus, SE|Pelaksana PNS|197609012011011001|129884|johnbarusse@gmail.com|Sekretariat|
-
 11|Nikmah, SP|Pelaksana PNS|196910162008012019|174644|nikmahsp66@gmail.com|Sekretariat|
-
 12|Zulkifli, SE|Pelaksana PNS|197307022007011032|385401|zulkifli.hl73@gmail.com|Sekretariat|
-
 13|Erwina Sari, S.Sos|Pelaksana PNS|197910142008012018|274093|erwinasari720@gmail.com|Sekretariat|
-
 14|Awang Faisyal Rachman, S,Sos, M.Si|Admin|197909152014031001|430017|awangfaisal@gmail.com|Sekretariat|
-
 15|Akhmad Syaifuddin Nor, SP|Admin|197502172006041008|399415|udhin75@gmail.com|Sekretariat|
-
 16|Jamilah, SE|Pelaksana PNS|197604152008012027|169901|jamilahsasa15@gmail.com|Sekretariat|
-
 17|M. Robyansyah, S.Sos|Pelaksana PNS|197701012007011028|150471|robyansah9090@gmail.com|Sekretariat|
-
 18|Ninik Riyanti, SP|Pelaksana PNS|198011242007012008|332672|riyantininik@yahoo.com|Sekretariat|
-
 19|Rina Ariani, SP|Pelaksana PNS|197905062007012021|568934|rina.kanaya1979@gmail.com|Sekretariat|
-
 20|Risa Widiawati Safitri, S.Sos|Pelaksana PNS|198202072008012015|319357|Risawidiyasari@gmail.com|Sekretariat|
-
 21|A.Juliansyah|Admin|198107142007011010|578346|a.juliansyah1981@gmail.com|Sekretariat|
-
 22|Iwan Supriadi|Pelaksana PNS|197904042010011023|483730|naysa.iwan@gmail.com|Sekretariat|
-
 23|Nani Rohanah|Pelaksana PNS|197212092008012011|572717|nanirohanah1972@gmail.com|Sekretariat|
-
 24|Susy Aryani|Pelaksana PNS|197110262001122003|467783|arianisusy435@gmail.com|Sekretariat|
-
 25|Tamerlan Mardiana|Pelaksana PNS|197710252007012024|259231|sifauzan01@gmail.com|Sekretariat|
-
 26|Abdul Gapur|Pelaksana PNS|198312292010011005|439201|abdulgafur083@gmail.com|Sekretariat|
-
 27|Joko Suprayitno|Pelaksana PNS|198011102010011025|303766|suprayitnojoko7@gmail.com|Sekretariat|
-
 28|Hendro Prawoto, S.P|Pelaksana PPPK|198310122025211022|501298|prawoto_h@yahoo.co.id|Sekretariat|
-
 29|Nur Hafijah, S.P|Pelaksana PPPK|199101172025212031|170702|rahmanmuthia937@gmail.com|Sekretariat|
-
 30|Dinna Yulinda, S.T.P|Pelaksana PPPK|199507172025212069|127251|dinnayulinda00@gmail.com|Sekretariat|
-
 31|Makkamadin Aras Nai, SH, MH|Pelaksana PPPK|198008172025211123|159605|arasnai.sh.mh@gmail.com|Sekretariat|
-
 32|Aji Faisal Hasan|Admin|198208292025211019|464648|faisal190819@gmail.com|Sekretariat|
-
 33|Emy Latifah|Pelaksana PPPK|199510102025212038|139063|emiegirl843@gmail.com|Sekretariat|
-
 34|Yuni Yarni|Pelaksana PPPK|197406222025212008|139817|yhunie7473@gmail.com|Sekretariat|
-
 35|Ika Purwanto|Pelaksana PPPK|198105252025211046|393734|ekapurwanto2505@gmail.com|Sekretariat|
-
 36|Erlita Sari|Pelaksana PPPK|199303042025212047|317639|erlitas019@gmail.com|Sekretariat|
-
 37|Zeth Rerung|Pelaksana PPPK|199309062025211061|322918|zethrerung@gmail.com|Sekretariat|
-
 38|Siti Muhani|Pelaksana PPPK|196808122025212005|316894|sitimuhani1968@gmail.com|Sekretariat|
-
 39|Agus Yulianto|Pelaksana PPPK|199408172025211101|598743|agusdesitgr123@gmail.com|Sekretariat|
-
 40|Edwin Syahruni|Pelaksana PPPK|197406132025211026|381126|edwinsyahruni@gmail.com|Sekretariat|
-
 41|Rudi Afriandi, SP|Kasubag Umtal|197704192008011015|592190|rudinoynay@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 42|Fitri Susilawaty, S.Sos|Pelaksana PNS|197510022003122004|474129|mbakfitri8822@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 43|Henny Herawaty, SP|Pelaksana PNS|197706152008012031|190649|hennyherawaty31@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 44|Ita Purnamasari, SP|Pelaksana PNS|198410292006042010|595346|ita83862@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 45|A.Jirzi Zaidhan|Pelaksana PNS|197501072007011025|201199|tempudew2009@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 46|Darhayani|Pelaksana PNS|197510212007012021|253128|yanidarha@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 47|Harun Alrasyid|Pelaksana PNS|197411212007011015|464758|alfa.21ha@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 48|Idlin Fitriani|Pelaksana PNS|198010052007012025|223900|auliahakiem@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 49|Jasnah Handayani|Pelaksana PNS|197008172007012036|476423|jasnahhandayani@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 50|Taupiqqurahim|Pelaksana PNS|196903272007011021|482188|disnak27@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 51|Tursino Hadi|Pelaksana PNS|198206042008011017|147925|tursinohartati@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 52|Widayati|Pelaksana PNS|196805152007012063|428924|widayatiw94@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 53|Fahim Panartion|Pelaksana PNS|198407062010011025|195559|fahiempland07@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 54|Kastam|Pelaksana PNS|196906142007011041|510971|kastam1406@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 55|Tria Ahmadi, SE|Pelaksana PPPK|199007262025211029|590190|ahmadi.tria@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 56|Saiful Arif, S.Sos|Pelaksana PPPK|198312142025211018|221665|ariefiful14@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 57|Rima Rusmala Dewi, S.P|Pelaksana PPPK|198112272025212016|427792|rimarusmaladewi@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 58|Nurul Istiqomah, SE|Pelaksana PPPK|199507052025212030|133588|nurulisti.kokom@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 59|M.Abu Bakar, S.Sos|Pelaksana PPPK|198811172025211020|430811|abu.milano17@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 60|Asmida Nur Santi, S.E|Pelaksana PPPK|198803072025212029|481898|midacute0202@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 61|Budi Arfiandi, S.Sos|Pelaksana PPPK|198903292025211022|336607|budiarfiandi@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 62|Dewi Sriyastini, S.P|Admin|198109062025212013|300649|arsyilaadrenna14@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 63|Ery Setiawan, SE|Pelaksana PPPK|199305222025211015|216493|erysetiawan22@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 64|Fabian Weda Ningrum, SE|Pelaksana PPPK|199106052025212040|340494|fabianweda@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 65|Henky Firmansyah, S.Sos|Pelaksana PPPK|198510252025211031|211070|henkyfirmansyah251085@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 66|Ellyana|Pelaksana PPPK|196811212025212001|533333|aellyana66@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 67|Hirma Juni Arsa|Pelaksana PPPK|198506192025212020|250952|arsahirmajuni@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 68|Joko Prawono|Pelaksana PPPK|197901032025211017|278332|jokopranowo022@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 69|Kusbandi Dwi Suripto|Pelaksana PPPK|198402162025211021|123478|akusbandi4@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 70|Muhammad Hendra Dwi Putra|Pelaksana PPPK|200104242025211006|141994|hendradwiputra121@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 71|Rahmat Nur Ibrahim|Pelaksana PPPK|198609292025211030|523535|rahmatnuribrahim1@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 72|Ronny Wijaya|Pelaksana PPPK|199107292025211030|498330|romafatan@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 73|Selvina Rahmadani|Pelaksana PPPK|200012152025212008|355906|vinarahmadani801@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 74|Widiyawati|Pelaksana PPPK|197511112025212011|289962|wdyawati1175@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 75|Wira Nur Supriadi|Pelaksana PPPK|200112042025211006|307084|wiranur52@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 76|Muhammad Zulfan Arhanda|Pelaksana PPPK|200102022025211009|249687|Muhammadzulfanarhanda@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 77|Iqtishor Saphari|Pelaksana PPPK|198311112025211039|519037|saphariiqtishor@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 78|Muhammad Gazali|Pelaksana PPPK|197609062025211024|374290|jalikutai@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 79|Abdul Mutalib|Pelaksana PPPK|198308232025211043|570498|abdulmutalib0203@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 80|Sri Hartati|Pelaksana PPPK|197208052025212014|570114|yatinurya58@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 81|Rachmat Hidayat|Pelaksana PPPK|198602092025211035|299630|muhamadraffafadillah56@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 82|Aji Muhammad Ridho Ihsan|Pelaksana PPPK|199810272025211045|151990|ajiridhoihsan@gmail.com|Sekretariat|Umum dan Tata Laksana
-
 83|M.Nazyarudin Miar, ST|Kepala Bidang|197401012007011065|309369|muhammadnazyarudin@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 84|H. Yayan Fazli, SP, MP|Pelaksana PNS|197401092000121003|482622|yanfaz33@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 85|Agus Suwarno, SP|Pelaksana PNS|197506192008011009|548062|agusssuwarno@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 86|Edy Saputra, SP|Pelaksana PNS|197202011994021001|475581|edsablok@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 87|Henny Agustinah, SP|Pelaksana PNS|197408282010012004|591993|hennyagustina47@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 88|Indah Meiliawati, SP|Pelaksana PNS|197705022007012047|456551|indahmeiliawaty@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 89|Irwansyah, SP|Pelaksana PNS|197206082010011011|548908|irwansyahloakulu@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 90|Mahda Fitriayani, SP|Pelaksana PNS|196906142008012021|199258|mahdafitriani679@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 91|Nurul Wardani, SP|Pelaksana PNS|197702082010012015|158295|trisnowidiyo@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 92|Rina Andriani, SP|Pelaksana PNS|197905112010012017|404894|rinaandriani351@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 93|Rini Widyastuti, SP|Pelaksana PNS|197303182010012001|514603|riniwidyastuti1973@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 94|Suriyadi Aswad, SP|Pelaksana PNS|197608162008011034|127048|suriyadi.aswad@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 95|Sutarno, SP|Pelaksana PNS|197705272010011005|161140|sutarnopertanian77@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 96|Usman, SP|Pelaksana PNS|197209112008011017|217122|uSMANazis72@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 97|Weni Triana, S.Sos|Pelaksana PNS|197503202000122003|323796|wennytriana20@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 98|Sofyansyah A, SP|Pelaksana PNS|197307022000121004|148774|temberaw@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 99|Musfi Hardani, S.Sos|Pelaksana PNS|197203282001122001|221569|musfihardani72@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 100|Budi Hartono, S.Sos|Pelaksana PNS|197407102007011029|327830|budihartonos.sos@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 101|Edi Suseno, S.Pkp|Pelaksana PNS|197302082007011028|489358|esuseno0802@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 102|Saipul Anwar, S.Sos|Pelaksana PNS|197103202006041015|407448|saipulanwarpertanian71@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 103|Alfian Hadi, A.Md|Pelaksana PNS|198107242008011011|467327|ppkloajanankukar@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 104|Aji Akhmad Sofian Nur Adinata K|Pelaksana PNS|198011302009011003|231132|ovie_sta@yahoo.co.id|Bidang Prasarana dan Sarana Pertanian|
-
 105|Burahmat|Pelaksana PNS|197208082008011021|446865|burahmatrahmat@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 106|Mohamad Amin|Pelaksana PNS|198002202007011018|316726|20amin021980@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 107|Muhamad Nasir|Pelaksana PNS|198512052010011010|174311|muhamadmasput85@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 108|Nurhamdi|Pelaksana PNS|197208122010011003|459805|nurhamdibacok@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 109|Ria Rosalin|Pelaksana PNS|198206062007012017|517428|riaonly82@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 110|Rusdaniah|Pelaksana PNS|198111172009022003|495164|awanggylang10503@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 111|Sapri Murianto|Pelaksana PNS|197601032007011016|263901|muriantosupri@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 112|Syafriansyah Rahman|Pelaksana PNS|197602052007011010|496531|gudel52@yahoo.com|Bidang Prasarana dan Sarana Pertanian|
-
 113|Hadiansyah|Pelaksana PNS|197503012007011024|535366|hadiansyahmuntai@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 114|Amiruddin|Pelaksana PNS|198003152010011026|241646|amirhmad1980@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 115|Adi Rahmadi, S.P|Pelaksana PPPK|198508312025211026|348300|aditambakrel121212@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 116|Agus Pratikno, S.P|Pelaksana PPPK|198808172025211054|526829|aguspratikno1988@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 117|Asep Widianto, S.P|Pelaksana PPPK|199310062025211030|229979|asepwidianto45@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 118|Didik Suhardiman, S.P|Pelaksana PPPK|198910252025211029|495643|sindonesia299@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 119|Dio Subyakto Pratama, S.P|Pelaksana PPPK|199702252025211017|184888|pratamadio62@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 120|Hendra Saputera, S.P|Pelaksana PPPK|198504232025211028|104031|hnra19@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 121|Herliyansyah, S.P|Pelaksana PPPK|197206062025211019|438802|herlyibrahim66@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 122|Nani Kumala Sari, S.P|Pelaksana PPPK|198504122025212023|557657|nanikumalasari51@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 123|Rusdiana, S.P|Pelaksana PPPK|198512302025212022|590713|dinaqoori@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 124|Sri Handayani, S.P|Pelaksana PPPK|198111272025212011|331007|srihan271181@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 125|Urbanus Paering, S.TP|Pelaksana PPPK|197907292025211010|116615|paeringinkado@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 126|Yogy Dewantana, S.TP|Pelaksana PPPK|199005112025211029|402550|yogydewantana@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 127|Pitri Anggawati, S.P|Pelaksana PPPK|199004302025212041|473674|pitriangga403@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 128|Melliawati|Pelaksana PPPK|197802152025212022|558354|zl3588663@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 129|Norma Rusmita|Pelaksana PPPK|198810222025212054|545676|mitabayu32@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 130|Heru Prabowo|Pelaksana PPPK|199104032025211046|426473|heruprabowo91@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 131|Ferri Pratama|Pelaksana PPPK|199509282025211041|463574|fpratama616@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 132|Hasanudin|Pelaksana PPPK|197806172025211056|517960|hasanudinn0321@gmail.com|Bidang Prasarana dan Sarana Pertanian|
-
 133|M.Farid, SP|Kepala Bidang|197803072010011008|594127|faridzaid7@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 134|Taufik, SP|Pelaksana PNS|197411041999031006|294235|taufik_jamaah@yahoo.co.id|Bidang Tanaman Pangan dan Hortikultura|
-
 135|Akhmad Riza Ramandha, SP|Pelaksana PNS|197606092008011019|380680|riza33@ymail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 136|Eli Yanasusanti, S.Sos|Pelaksana PNS|198012032000122002|194600|eliyanasusanti03@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 137|Ely Nuryanti, SP|Pelaksana PNS|197707212008012013|579290|elyanti2177@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 138|Leliana, SP|Pelaksana PNS|197311212008012010|390383|lelisofian17@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 139|Nurodin, SP|Pelaksana PNS|197103102007011034|244364|norodin1971@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 140|Sudarwati, SP, M.Si|Pelaksana PNS|197906032010012019|323358|chachaarmicha@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 141|Titin Damayanti, SP|Pelaksana PNS|197802262008012016|554622|titindamayanti23@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 142|Kus Endang Junaidy, S.Hut|Pelaksana PNS|197903082008011025|390377|kustgr83@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 143|Aji Roy Winata, SE|Pelaksana PNS|197703112007011016|499311|bintangirawan3@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 144|Haryono, SP|Pelaksana PNS|197308012007011031|398967|nonokmaha@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 145|Joko Supadmo, S.Pkp|Pelaksana PNS|197705122008011034|557778|jokosupadmoupttgr@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 146|Juliana Astuti, SP|Pelaksana PNS|197707142007012034|123982|julianaastuti147@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 147|Muhammad Anton Yusva, SP|Pelaksana PNS|197903302007011007|135445|antoniqbal57@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 148|Nor Asikin, SP|Pelaksana PNS|197210122008012015|418141|ummynya.yaya@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 149|Muhamad Agus, S.Sos|Pelaksana PNS|197508242009021001|454626|subrantas78@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 150|Supriyatno, SE|Pelaksana PNS|198204042009021008|195579|soepridistan@yahoo.co.id|Bidang Tanaman Pangan dan Hortikultura|
-
 151|M.Johansyah, SE|Pelaksana PNS|197902172008011018|283563|tujof79@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 152|Yudhi Hermawan, A.Md|Pelaksana PNS|197703102008011018|324112|yudisorang@yahoo.com|Bidang Tanaman Pangan dan Hortikultura|
-
 153|Akhmad Rizali, A.Md|Pelaksana PNS|198107052008011023|557358|akhmad.rizal81@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 154|Erni Fithriani|Pelaksana PNS|198011292009012001|268979|ericselyn@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 155|Erniwati|Pelaksana PNS|197501232000122002|443546|ernijannah75123@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 156|Junaidi|Pelaksana PNS|197309052007011025|123144|maseddijun@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 157|Mulyani|Pelaksana PNS|198001152008012012|458963|mulyanimelany59@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 158|Rimayana|Pelaksana PNS|196810112007012023|539192|Rimayana68@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 159|Sarah Ratna Afianti|Pelaksana PNS|198111172007012012|551025|sarahratnaafianti@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 160|Syahrudin|Pelaksana PNS|197603012010011010|502779|rudinsyah599@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 161|Syarifuddin|Pelaksana PNS|197407152008011021|144939|syarifuddinbp3k74@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 162|Zakaria|Pelaksana PNS|197809172010011011|460739|zakazakaria1978@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 163|Ahmad Muslim, S.P|Pelaksana PPPK|198808132025211021|225005|ahmadmusliem678@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 164|Dila Risdiani, S.Sos|Pelaksana PPPK|198802072025212020|114091|dilarisdiani@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 165|Dwy Eka Maharani, S.P|Pelaksana PPPK|198211212025212015|591317|dwymaharani32@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 166|Efri Januari, S.P|Pelaksana PPPK|198401222025211011|458179|efri.kutai@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 167|Elisa Fitriani, S.Sos|Pelaksana PPPK|199104162025212032|111179|elisafitriani1635@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 168|Emelda Riska Susanti, S.P|Pelaksana PPPK|198202232025212016|311515|emeldariska858@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 169|Eny Fitriany, S.Sos|Pelaksana PPPK|198710162025212022|572512|enychemot@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 170|Ervian Haribudiman, S.Sos|Pelaksana PPPK|199312222025211022|599506|empivv@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 171|Fitriansyah, S.Sos|Pelaksana PPPK|198805152025211054|323628|fitriansyah88889@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 172|Hendro Winarto, S.P|Pelaksana PPPK|198403152025211030|296389|winartohendro94@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 173|Iva Yanti, S.P|Pelaksana PPPK|197902212025212007|292536|ivayanti711@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 174|Lalu Muhamad Syukur, S.P|Pelaksana PPPK|198311092025211020|263835|muhamadsyukur038@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 175|Mochammad Zainuri Ikhwan, S.P|Pelaksana PPPK|199202132025211026|123714|zainuri92@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 176|Muhammad Fazri Azhari, S.P|Pelaksana PPPK|198311182025211012|113348|azhynezious@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 177|Rachmad Afandi, S.P|Pelaksana PPPK|197909032025211022|128491|fendi100pemt@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 178|Suprapti, S.P|Pelaksana PPPK|198306102025212026|417073|praptiherwiwin@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 179|Susanto Hadi Prastyoningtias, S.P|Pelaksana PPPK|198204262025211011|289688|prastyoningtias@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 180|Aji Theresia Bariah|Pelaksana PPPK|197104262025212005|387614|ajitheresia@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 181|Melda Maya Sari|Pelaksana PPPK|199408052025212068|142958|mayasariamel52@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 182|Ayu Ditha Pratiwi|Pelaksana PPPK|198609092025212060|505607|ditharaskey86@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 183|Ika Mardiana Astuti|Pelaksana PPPK|198609232025212037|486671|madam_ikacantik@yahoo.co.id|Bidang Tanaman Pangan dan Hortikultura|
-
 184|Zainab|Pelaksana PPPK|197005132025212004|233179|zainabdistanak@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 185|Muhammad Andra Ariadi|Pelaksana PPPK|200206222025211006|172145|Andra.ariadi32@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 186|Dayang Siti Selsilawati Agustina|Pelaksana PPPK|199708162025212086|453100|dayangtina16@gmail.com|Bidang Tanaman Pangan dan Hortikultura|
-
 187|Erwin Suryawirawan, SP|Kepala Bidang|197701312008011012|170999|erwinsuryaw@yahoo.com|Bidang Usaha dan Penyuluhan|
-
 188|Hendra Budianoor, SP|Pelaksana PNS|198101272001121003|128509|hendramerina@gmail.com|Bidang Usaha dan Penyuluhan|
-
 189|Arizal Rakhman, SP|Pelaksana PNS|198210262009011003|596621|rizal.azm@gmail.com|Bidang Usaha dan Penyuluhan|
-
 190|A.M. Djunaidi A, S.St|Pelaksana PNS|196903211998031004|565340|amdjunaidia@gmail.com|Bidang Usaha dan Penyuluhan|
-
 191|Adriansyah, SP|Pelaksana PNS|197512172008011007|340086|adriansyahdistan@gmail.com|Bidang Usaha dan Penyuluhan|
-
 192|Arbiana Sukmawati, SP|Pelaksana PNS|197512162007012016|253667|umiqori16@gmail.com|Bidang Usaha dan Penyuluhan|
-
 193|Diana Munawwarah, SP|Pelaksana PNS|197602272001122003|537165|dianamunawwarah51@gmail.com|Bidang Usaha dan Penyuluhan|
-
 194|Johan Syahrani, SP, M.A.P|Pelaksana PNS|198311012010011018|496280|johansyahrani1@gmail.com|Bidang Usaha dan Penyuluhan|
-
 195|Lenni Marlina Ritonga, SP|Pelaksana PNS|197906182010012006|137893|lennimarlinaritonga@gmail.com|Bidang Usaha dan Penyuluhan|
-
 196|Marlinna Miar, SP, M.Si|Pelaksana PNS|197109292007012021|372697|marlinnaaa299@gmail.com|Bidang Usaha dan Penyuluhan|
-
 197|Misrani Dedy Riyanto, SP|Pelaksana PNS|197411042008011013|315831|Dedyriyanytosanga2@gmail.com|Bidang Usaha dan Penyuluhan|
-
 198|Maryani, SE|Pelaksana PNS|197412162008012008|263713|mayaniyani94@gmail.com|Bidang Usaha dan Penyuluhan|
-
 199|Sri Rahayu, SP|Pelaksana PNS|197910302010012003|307643|ayuanara46@gmail.com|Bidang Usaha dan Penyuluhan|
-
 200|Asnan A, S.Sos|Pelaksana PNS|196912222000121004|102329|asnannan245@gmail.com|Bidang Usaha dan Penyuluhan|
-
 201|Desy Susanti, S.Kom|Pelaksana PNS|198112012008012016|302778|dessy.susanti72@gmail.com|Bidang Usaha dan Penyuluhan|
-
 202|Khrisna Yuniarti, A.Md, S.Hut|Pelaksana PNS|197806182008012025|171867|yuniartikrisna85@gmail.com|Bidang Usaha dan Penyuluhan|
-
 203|Rahmad Haryadi, A.Md|Pelaksana PNS|198105012009021002|256689|saktiaperdanaputra@gmail.com|Bidang Usaha dan Penyuluhan|
-
 204|Norma|Pelaksana PNS|197804222009012001|523733|normanaysa@gmail.com|Bidang Usaha dan Penyuluhan|
-
 205|Agus Elfian Joni|Pelaksana PNS|196902112007011027|146384|joniagus437@gmail.com|Bidang Usaha dan Penyuluhan|
-
 206|Andri|Pelaksana PNS|197407032007011029|302894|andymustaine03@gmail.com|Bidang Usaha dan Penyuluhan|
-
 207|Badran, S.HI|Pelaksana PNS|197408072007011034|265966|hairilhairil657@gmail.com|Bidang Usaha dan Penyuluhan|
-
 208|Fitria Yulianti|Pelaksana PNS|198107182010012004|378338|Fitria.yulianti3488@gmail.com|Bidang Usaha dan Penyuluhan|
-
 209|Hermanto|Pelaksana PNS|197501052009061005|441548|hermantobedjo@gmail.com|Bidang Usaha dan Penyuluhan|
-
 210|Ida Charyani|Pelaksana PNS|197201152007012025|243387|idacharyani@gmail.com|Bidang Usaha dan Penyuluhan|
-
 211|Jamroni|Pelaksana PNS|198203162009021003|121703|jamroniarya@yahoo.com|Bidang Usaha dan Penyuluhan|
-
 212|Lambas Sitompul|Pelaksana PNS|197003152010011004|495310|sitompullambas70@gmail.com|Bidang Usaha dan Penyuluhan|
-
 213|Rima Afrima.A, SE|Pelaksana PNS|198604162010012028|497117|rimaafrima1986@gmail.com|Bidang Usaha dan Penyuluhan|
-
 214|Sopyan Hadi|Pelaksana PNS|198011252007011011|477311|sopyan9999@gmail.com|Bidang Usaha dan Penyuluhan|
-
 215|Sri Hartati|Pelaksana PNS|197606112007012019|183057|srie.yeye@gmail.com|Bidang Usaha dan Penyuluhan|
-
 216|Sulastri|Pelaksana PNS|198302022008012024|171564|sulastriselalusetia@gmail.com|Bidang Usaha dan Penyuluhan|
-
 217|Supriyono|Pelaksana PNS|196904022009021001|128232|brayyono6@gmail.com|Bidang Usaha dan Penyuluhan|
-
 218|Susanto|Pelaksana PNS|197005212007011029|446980|susanto070@gmail.com|Bidang Usaha dan Penyuluhan|
-
 219|Andi Wahyudi|Pelaksana PNS|198310022012121003|393727|andi.lulut@gmail.com|Bidang Usaha dan Penyuluhan|
-
 220|Mursyid|Pelaksana PNS|197104172006041014|401696|ketemu98@gmail.com|Bidang Usaha dan Penyuluhan|
-
 221|Rendi Irawan|Pelaksana PNS|198407272010011031|312692|rendy.rhere@gmail.com|Bidang Usaha dan Penyuluhan|
-
 222|Abdullah Zauhari, S.Pd.I|Pelaksana PPPK|198909072025211027|269914|zauhariabdullah79@gmail.com|Bidang Usaha dan Penyuluhan|
-
 223|Agus Suprianto, SE|Pelaksana PPPK|197708112025211011|196830|agussantoh78@gmail.com|Bidang Usaha dan Penyuluhan|
-
 224|Alda Nanda Pratiwi, S.Pd|Pelaksana PPPK|199905252025212018|134435|pratiwialda25@gmail.com|Bidang Usaha dan Penyuluhan|
-
 225|Ali Rahman, S.Pd|Pelaksana PPPK|199002022025211032|421264|alir020290@gmail.com|Bidang Usaha dan Penyuluhan|
-
 226|Anggi Wijaya Mulawarman, SH|Pelaksana PPPK|198410032025211020|570177|anggiwijayam@gmail.com|Bidang Usaha dan Penyuluhan|
-
 227|Eka Ramadani, S.PKP|Pelaksana PPPK|198506012025211025|451712|donimaha749@gmail.com|Bidang Usaha dan Penyuluhan|
-
 228|Endah Mayangsari, S.P|Pelaksana PPPK|199004162025212029|438481|endahnirwana16@gmail.com|Bidang Usaha dan Penyuluhan|
-
 229|Feby Ade Nuzuliadi, S.P|Pelaksana PPPK|199402282025211035|252526|febyadenuzuliadi@gmail.com|Bidang Usaha dan Penyuluhan|
-
 230|Heny Rosyani, SE|Pelaksana PPPK|199110022025212032|137226|henyros16@gmail.com|Bidang Usaha dan Penyuluhan|
-
 231|Ida Nirmala, SE|Pelaksana PPPK|196905122025212005|164334|idanirmalase@gmail.com|Bidang Usaha dan Penyuluhan|
-
 232|Irwan, S.Ak|Pelaksana PPPK|197609292025211016|242701|ironeaz29@gmail.com|Bidang Usaha dan Penyuluhan|
-
 233|M. Zakaria, SE|Pelaksana PPPK|198210182025211025|184377|zakalahzakaria@gmail.com|Bidang Usaha dan Penyuluhan|
-
 234|Muhammad Musthofa Ulya, S.Pd|Pelaksana PPPK|199708012025211015|549693|musthofa69.mu@gmail.com|Bidang Usaha dan Penyuluhan|
-
 235|Mulyadi, S.P|Pelaksana PPPK|198604082025211034|149931|mulyadimaha86@gmail.com|Bidang Usaha dan Penyuluhan|
-
 236|Musdalipah, S.P|Pelaksana PPPK|199112042025212024|395054|muhses91@gmail.com|Bidang Usaha dan Penyuluhan|
-
 237|Noor Baity, S.P|Pelaksana PPPK|199109222025212032|504795|betty22naya@gmail.com|Bidang Usaha dan Penyuluhan|
-
 238|Randi Hastaria, SE|Pelaksana PPPK|198508062025211031|160816|randihastaria.se@gmail.com|Bidang Usaha dan Penyuluhan|
-
 239|Rendi Kurniawansyah, SE|Pelaksana PPPK|198710182025211027|595290|rendycuki@gmail.com|Bidang Usaha dan Penyuluhan|
-
 240|Suparjiono, SE|Pelaksana PPPK|197206152025211018|563708|suparjionojiono4@gmail.com|Bidang Usaha dan Penyuluhan|
-
 241|Irma Wahyuni, S.P.|Pelaksana PPPK|198408272025212048|402512|irmapertanian@gmail.com|Bidang Usaha dan Penyuluhan|
-
 242|Aulia Rahman, A.Md|Pelaksana PPPK|198402062025211021|466661|garox6006@gmail.com|Bidang Usaha dan Penyuluhan|
-
 243|Rohana Tristina|Pelaksana PPPK|198707262025212032|592531|rohanatristina430@gmail.com|Bidang Usaha dan Penyuluhan|
-
 244|Tri Handayani|Pelaksana PPPK|198105052025212031|401671|trienandhika05@gmail.com|Bidang Usaha dan Penyuluhan|
-
 245|Hari Santiko|Pelaksana PPPK|197005132025211010|357141|harydoglas12@gmail.com|Bidang Usaha dan Penyuluhan|
-
 246|Norsehan|Pelaksana PPPK|197703282025212014|224909|smdkaltim388@gmail.com|Bidang Usaha dan Penyuluhan|
-
 247|Noor Santi|Pelaksana PPPK|198701212025212030|190852|noorsanti01@gmail.com|Bidang Usaha dan Penyuluhan|
-
 248|Syafitriansyah|Pelaksana PPPK|197709172025211018|508040|tepiantebor13@gmail.com|Bidang Usaha dan Penyuluhan|
-
 249|Herika Dianti|Pelaksana PPPK|198111292025212008|389132|herikadianty@gmail.com|Bidang Usaha dan Penyuluhan|
-
 250|Dita Siskiani|Pelaksana PPPK|199212182025212025|427182|ditasiskiani@gmail.com|Bidang Usaha dan Penyuluhan|
-
 251|Dwi Febriatiningsih|Pelaksana PPPK|198102182025212018|426767|ningsih27277@gmail.com|Bidang Usaha dan Penyuluhan|
-
 252|Tri Endang Wahyuni|Pelaksana PPPK|199303022025212027|295055|tri99jaya@gmail.com|Bidang Usaha dan Penyuluhan|
-
 253|Khairun Nisa|Pelaksana PPPK|199908162025212012|265955|khairunnisa166718@gmail.com|Bidang Usaha dan Penyuluhan|
-
 254|Silvana Rahmawati|Pelaksana PPPK|197709062025212011|136699|rahmawatisilvana6@gmail.com|Bidang Usaha dan Penyuluhan|
-
 255|Sri Wahyuni|Pelaksana PPPK|197701292025212003|354751|sriwahyuni290177@gmail.com|Bidang Usaha dan Penyuluhan|
-
 256|Sugianto|Pelaksana PPPK|196908052025211010|532968|sugiantogentok372@gmail.com|Bidang Usaha dan Penyuluhan|
-
 257|Sutarsih|Pelaksana PPPK|197401012025212005|292775|sutarsih0174@gmail.com|Bidang Usaha dan Penyuluhan|
-
 258|Wawan Setiawan|Pelaksana PPPK|198610212025211025|265423|alkaalfaeza11234@gmail.com|Bidang Usaha dan Penyuluhan|
-
 259|Yanti Astuti|Pelaksana PPPK|198605112025212022|424756|yantiastutie@gmail.com|Bidang Usaha dan Penyuluhan|
-
 260|Padli|Pelaksana PPPK|197808212025211010|102640|ppadli398@gmail.com|Bidang Usaha dan Penyuluhan|
-
 261|Sudarno|Pelaksana PPPK|198108112025211022|467442|sudarnonunok@gmail.com|Bidang Usaha dan Penyuluhan|
-
 262|Widodo|Pelaksana PPPK|198201082025211017|118048|dodowidodo20@gmail.com|Bidang Usaha dan Penyuluhan|
-
 263|Eva Susanti|Pelaksana PPPK|198510032025212014|483228|evasusanti12517@gmail.com|Bidang Usaha dan Penyuluhan|
-
 264|Ida Farida|Pelaksana PPPK|197610052025212006|299543|idafaridaeggy@gmail.com|Bidang Usaha dan Penyuluhan|
-
 265|Ida Wahyuni|Pelaksana PPPK|198110062025212009|144566|idaw6668@gmail.com|Bidang Usaha dan Penyuluhan|
-
 266|Sofyan Nur|Pelaksana PPPK|197512202025211012|575917|sofyannur5809@gmail.com|Bidang Usaha dan Penyuluhan|
-
 267|Zulfani Azwar|Pelaksana PPPK|198907122025211039|419700|zulfannyazwar0907@gmail.com|Bidang Usaha dan Penyuluhan|
-
 268|Firdaus Alam Setiawan|Pelaksana PPPK|199405242025211025|361369|firdauz.alam94@gmail.com|Bidang Usaha dan Penyuluhan|
-
 269|Hosen|Pelaksana PPPK|197708142025211014|464539|hosenety37@gmail.com|Bidang Usaha dan Penyuluhan|
-
 270|M.Mustamin|Pelaksana PPPK|198704022025211022|325425|mustamin020487@gmail.com|Bidang Usaha dan Penyuluhan|
-
 271|Nanang Effendi|Pelaksana PPPK|197606162025211018|429211|nanangeppendi@gmail.com|Bidang Usaha dan Penyuluhan|
-
 272|Putra Adiatma|Pelaksana PPPK|198903092025211034|466495|Putra.adiatma79@gmail.com|Bidang Usaha dan Penyuluhan|
-
 273|Tria Nurista Laqad K|Pelaksana PPPK|199303152025212037|506827|nuristalaqad@gmail.com|Bidang Usaha dan Penyuluhan|
-
 274|Pajriani|Pelaksana PPPK|198404202025211039|471320|pajriani357@gmail.com|Bidang Usaha dan Penyuluhan|
-
 275|Habiburrohman|Pelaksana PPPK|199705292025211029|369140|hburrohman7@gmail.com|Bidang Usaha dan Penyuluhan|
-
 276|Etri Dayanti|Pelaksana PPPK|198703172025212023|400915|etridayanti17041987@gmail.com|Bidang Usaha dan Penyuluhan|
-
 277|Heni Herawati|Pelaksana PPPK|197109012025212005|423632|heniherawati0109@gmail.com|Bidang Usaha dan Penyuluhan|
-
 278|Nadya Febrianti Putri|Pelaksana PPPK|199702232025212015|537761|fnadya199@gmail.com|Bidang Usaha dan Penyuluhan|
-
 279|Rusmila Mardianti|Pelaksana PPPK|198803222025212034|205619|rusmilamardianti22@gmail.com|Bidang Usaha dan Penyuluhan|
-
 280|Mawarni|Pelaksana PPPK|198009302025212018|399258|mawarniiii.30@gmail.com|Bidang Usaha dan Penyuluhan|
-
 281|Surahman|Pelaksana PPPK|198807072025211091|251526|surahmansn5@gmail.com|Bidang Usaha dan Penyuluhan|
-
 282|Baniah|Pelaksana PPPK|197201162025212010|122646|baniah342@gmail.com|Bidang Usaha dan Penyuluhan|
-
 283|Leli Chandra Repita|Pelaksana PPPK|200201012025212006|590509|LELYCHANDRA8899@GMAIL.COM|Bidang Usaha dan Penyuluhan|
-
 284|Al Qadri|Pelaksana PPPK|197505102025211055|164459|Alqadri1005@gmail.com|Bidang Usaha dan Penyuluhan|
-
 285|Firman Qalam Setiawan|Pelaksana PPPK|199108272025211043|288753|virmancrow91@gmail.com|Bidang Usaha dan Penyuluhan|
-
 286|M. Noer Budi Setiawan|Pelaksana PPPK|199404042025211155|165191|budikukar4@gmail.com|Bidang Usaha dan Penyuluhan|
-
 287|Sumi|Pelaksana PPPK|197704152025212020|257032|pertaniansumi4@gmail.com|Bidang Usaha dan Penyuluhan|
-
 288|Aji Gazali Rahman, S.Pt, MP|Kepala Bidang|196806091991021002|375907|ajighazali234@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 289|Ir. Nelva Aflinda|Pelaksana PNS|196804291998032004|527713|nelvaaflinda29@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 290|Aji Zikri Zulfian, S.Pt|Pelaksana PNS|197609202006041003|466695|ajizikrizulfian2@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 291|Haeruna, SP|Pelaksana PNS|196804061991021005|265324|haeruna0604@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 292|Tri Widiastuti S.W, SE|Pelaksana PNS|198303262010012028|103128|acityalituhayu24@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 293|Zainal Abidin, SE|Pelaksana PNS|197311212008011010|236574|bidinketupat@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 294|Erau Achmad Rusianto, SE|Pelaksana PNS|197309282007011029|270715|erau.dira@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 295|Sahono, S.Pkp|Pelaksana PNS|197009252000121006|289536|sahono19700@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 296|Akhdalena, SE|Pelaksana PNS|197811122007012024|424078|akhdalena@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 297|Eka Nursih, SP|Pelaksana PNS|197405062007012033|145766|ekanursih65@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 298|Herry Gunawan, SE|Pelaksana PNS|197201062007011026|428112|hery38288@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 299|Leli Mahdalena, S.Sos|Pelaksana PNS|197604122007012033|282018|lelimahdalena123@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 300|Rahmawati Astuti, SM|Pelaksana PNS|197608222000122002|344739|rhmwtastuti@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 301|Samsi, SE|Pelaksana PNS|197706082007011020|440432|samsi12tgr@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 302|Syahmadi, S.Sos|Pelaksana PNS|197212182007011012|520408|madkkukar@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 303|Tati Hariaty Fitri, SE|Pelaksana PNS|198307122008012013|429504|tatihariatyfitri@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 304|Eny Diana, A.Md|Pelaksana PNS|197004142000122005|340259|enydiana274@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 305|Muhammad Fuad|Pelaksana PNS|197001142000121004|582451|muhammadfuad1401@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 306|Aspiansyah|Pelaksana PNS|197510292008011008|209183|julakian.75@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 307|Faidil Anwar|Pelaksana PNS|197808272007011008|346554|faidil.distanak@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 308|Heny Triana|Pelaksana PNS|197607252007012027|463025|heny.riana160776@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 309|Husni Thamrin|Pelaksana PNS|196808162006041013|527540|thusni737@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 310|Indra Budiman|Pelaksana PNS|198101282010011002|556113|indrabudimanloakulu@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 311|Iwan Wahyudi|Pelaksana PNS|197803212007011010|580846|iw4309702@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 312|M.Nur Alamsyah|Pelaksana PNS|198101032007011016|421945|muhammadnuralamsyah.mna@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 313|Nafisah|Pelaksana PNS|197107272007012022|580948|niniknafisah27@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 314|Drh. Gunawan Nanang Dwi Basuki Soewarto|Pelaksana PPPK|197111052025211012|427477|gunawannanang051171@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 315|Drh. Rianty Novita Sari|Pelaksana PPPK|199606032025212025|333797|rianty.po@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 316|Agustina.Mb, S.P|Pelaksana PPPK|197008172025212009|381307|agustinambsp@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 317|Ahmad Efendi, SE|Pelaksana PPPK|198110072025211021|112730|ahmadoang99@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 318|Delta Septi Syulliana, S.E|Pelaksana PPPK|198409182025212020|335262|deltass84@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 319|Dimas Bhakti Nan Ichsani, S.Pt|Pelaksana PPPK|199501162025211014|137437|dimasbhakti16@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 320|Ema Zulfianti, S.Pt|Pelaksana PPPK|199106202025212028|536133|zulfiantiema@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 321|Ida Ayu Putu Sri Utami, SE|Pelaksana PPPK|198601092025212015|120486|dayusri65719@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 322|Mailia Widiastuti, SP., M.Si|Pelaksana PPPK|197605262025212013|183217|maylia0kto@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 323|Mochamad Hendriawan.S. S.P|Pelaksana PPPK|199102122025211034|105579|drumerudin@ymail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 324|Rosita, S.Sos|Pelaksana PPPK|198611292025212025|353290|rositaqu86@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 325|Salmawati, S.Pt|Pelaksana PPPK|197610092025212012|403567|inuchamay76@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 326|Suliem, S.Sos|Pelaksana PPPK|197608062025212008|278832|sulisuliem116@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 327|Syartika Tristiana, S.Sos., M.H|Pelaksana PPPK|198604072025212027|113343|Syartiqamh@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 328|Wawan Supriawan, S.Sos|Pelaksana PPPK|198112102025211021|492287|w4w4n101281@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 329|Debora Maretha Aulia Elva Br Siahaan, S.Pt|Pelaksana PPPK|199303252025212076|260544|deboraetha0@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 330|Benny Lugiarti, S.P|Pelaksana PPPK|197608132025212011|219099|bennypunya8@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 331|Hariyanto Nathan, S.P|Pelaksana PPPK|198607262025211040|276665|arhienathan86@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 332|Ramadana, S.P|Pelaksana PPPK|199412052025212048|325146|ramadana51294@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 333|Noor Hidayah|Pelaksana PPPK|198211192025212011|125154|noorhidayah1182@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 334|Wahyudhi|Pelaksana PPPK|198702262025211022|583768|farrelalrizky1987@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 335|Kurniawan Adi Surya|Pelaksana PPPK|198603052025211026|154795|kuriwan150@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 336|Eva Rosita|Pelaksana PPPK|200201012025212020|523336|evharosita01@gmail.com|Bidang Peternakan dan Kesehatan Hewan|
-
 337|Hery Marsudi J, SP, MP|Kasubag TU UPT|196906012000121007|414791|herrymarsudi199@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 338|Muliani, SP|Pelaksana PNS|197611192010012015|445838|mulianizain1119@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 339|Suharyono, SP|Pelaksana PNS|197308011997031003|557670|suharyonokukar534@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 340|Astuti, S.Sos|Pelaksana PNS|197302052008012016|442536|mamakastuti73@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 341|Suharda, SP|Pelaksana PNS|197806102007012023|162602|suardasp@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 342|Rukiati, S.Pkp|Pelaksana PNS|197210122000122003|108223|rukiati1072@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 343|Indra Gunawan, SP|Pelaksana PNS|198107152008011019|394241|indrabangben81@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 344|Erie Roebiyanto, SP|Pelaksana PNS|198211022007011004|529376|erieroebiyanto@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 345|Irwansyah|Pelaksana PNS|197911092008011011|546133|irwansyah72blog@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 346|Windarti|Pelaksana PNS|198008122009022009|545431|windartislamet85@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 347|Syahroni|Pelaksana PNS|198404122010011025|367176|meteorid23@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 348|Rusniah, A,Md|Pelaksana PPPK|198111082025212016|455865|rusniah2727@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 349|Githa Puspita Sari|Pelaksana PPPK|199706092025212016|318732|sarygitha25@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 350|Siyamto|Pelaksana PPPK|197709032025211023|343315|siyamtorapaklambur@gmail.com|UPT Balai Benih Pembantu Tanaman Pangan|Tata Usaha
-
 351|M.Nazyarudin Miar, ST|Kepala UPT|197401012007011065|586267|muhammadnazyarudin@gmail.com|UPT Balai Benih Pembantu Hortikultura|
-
 352|Indah Kusumawati, SP|Pelaksana PNS|198006192010012019|260467|indahpertanian80@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 353|Gunarto|Pelaksana PNS|197407042008011017|460643|gunartoSPMA74@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 354|Salmiah, SP|Pelaksana PNS|198106042010012028|136440|salmiah981@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 355|Sapran|Pelaksana PNS|197503022007011022|473630|sapranwalet2@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 356|Joko Apriyono Putro|Pelaksana PNS|197704082010011011|547341|jokoputro3256@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 357|Adi Susanto, A.Md|Pelaksana PPPK|197705082025211011|431623|adisusantoloakulu@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 358|Moh. Hasan|Pelaksana PPPK|197410252025211014|394017|mhasan250174@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 359|Masroni|Pelaksana PPPK|197807042025211031|516059|mas.roni787878@gmail.com|UPT Balai Benih Pembantu Hortikultura|Tata Usaha
-
 360|Nurodin, SP|Kepala UPT|197103102007011034|110536|norodin1971@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|
-
 361|John Laurens Barus, SE|Kasubag TU UPT|197609012011011001|578876|johnbarusse@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 362|Elvi Noor Sukaisih, SP|Pelaksana PNS|197101132007012009|342862|sukaisihelvi77@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 363|Suyatun, SP|Pelaksana PNS|197307012008012017|299241|suyatun.atun17@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 364|Istikharah, S.Sos|Pelaksana PNS|198506032010012036|551400|istimuthia181@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 365|Ismiyanto|Pelaksana PNS|198209122008011011|556599|ismiyantoy3@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 366|Machmum Imam Cholis|Pelaksana PNS|197704262008011016|591858|machmumimamcholis@yahoo.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 367|Sri Heldina|Pelaksana PNS|197308012007012031|440468|dinad4804@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 368|Deddy Supiadi|Pelaksana PNS|198003232009021003|386442|bodettgr@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 369|Retno Pudji Kusumaningsih|Pelaksana PPPK|198903262025212030|116436|retnopudjikusumaningsih@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 370|Muhammad Nur|Pelaksana PPPK|197609012025211023|420327|norm34201@gmail.com|UPT Balai Proteksi Tanaman Pangan Dan Hortikultura|Tata Usaha
-
 371|Aji Zikri Zulfian, S.Pt|Kepala UPT|197609202006041003|225828|ajizikrizulfian2@gmail.com|UPT Pembibitan Sapi Potong, Muara Kaman|
-
 372|Sukianto, A.Md|Pelaksana PNS|197504192008011009|195437|sukiantokahala75@gmail.com|UPT Pembibitan Sapi Potong, Muara Kaman|Tata Usaha
-
 373|Arbainah|Pelaksana PNS|197805022007012026|572265|arbainahbenah32@gmail.com|UPT Pembibitan Sapi Potong, Muara Kaman|Tata Usaha
-
 374|Mirhansyah|Pelaksana PNS|197208262007011011|222643|Mirhansyah72@gmail.com|UPT Pembibitan Sapi Potong, Muara Kaman|Tata Usaha
-
 375|Mita|Pelaksana PPPK|198610092025212026|212818|mitamufid5@gmail.com|UPT Pembibitan Sapi Potong, Muara Kaman|Tata Usaha
-
 376|Muhtadin|Pelaksana PPPK|198812312025211071|333416|tadinbara@gmail.com|UPT Pembibitan Sapi Potong, Muara Kaman|Tata Usaha
-
 377|Siti Asyiah, A.Md|Kepala UPT|197101132007012010|141802|sitiasyiah1971@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|
-
 378|Eddy Sarjono, S.Pkp|Pelaksana PNS|197906152007011013|543457|sarjonodistan@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 379|Alpiansyah|Pelaksana PNS|197306242008011012|371557|alpianw7@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 380|Erwindo Senantha|Pelaksana PNS|197406192010011006|146862|erwindo74@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 381|Fitrianto|Pelaksana PNS|198606092008011003|259965|fhitriyanto@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 382|Syahlan Nuraidi|Pelaksana PNS|197305152001121011|131845|syahlandistan@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 383|Muhammad Taufik Joko Samudro|Pelaksana PNS|198403252010011024|490759|mohdtaufikjoko@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 384|Azhari|Pelaksana PPPK|197108012025211012|186842|azharikukar7@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 385|Halimah|Pelaksana PPPK|198607042025212017|539813|halimahp3k@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 386|Haniah|Pelaksana PPPK|197603022025212006|517024|haniahhaniah958@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 387|Mahlan|Pelaksana PPPK|197608092025211012|565259|mahlan0876@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 388|Mayang Sari|Pelaksana PPPK|198501092025212022|295848|mayangg1985@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 389|Nurwahidah|Pelaksana PPPK|197503112025212008|337135|mayangg1985@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 390|Dedi Aspawiharja|Pelaksana PPPK|198009282025211026|484726|dediaspawiharja8@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 391|Sukarni|Pelaksana PPPK|198807162025212076|100251|sukarnik222@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 392|Muhammad Akbar|Pelaksana PPPK|199604042025211070|431687|muhammadakbar960304@gmail.com|UPT Pusat Kesehatan Hewan, Kota Bangun|Tata Usaha
-
 393|Normaliana, SP, MP|Kepala UPT|197210072007012028|502267|normaliana_disnak@yahoo.com|UPT Pusat Kesehatan Hewan, Muara Badak|
-
 394|Sarnia, SP|Kasubag TU UPT|197607182008012017|520512|nhia.sarnia76@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 395|Dwi Wahyuni, SP|Pelaksana PNS|197703122008012023|118535|dwicester77@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 396|Benidektus|Pelaksana PNS|197809192007011023|430370|benirose6@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 397|Jayus|Pelaksana PNS|198003122008011020|583310|jayuspertanian@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 398|Muhammad Kacong|Pelaksana PNS|198111052008011015|579780|muhammadkacong81@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 399|Muhayan|Pelaksana PNS|197203232007011018|487359|muhayan230373@gmail.Com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 400|Ridwan|Pelaksana PNS|198409022010011017|375732|ridwan.diana84@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 401|Sadriansyah|Pelaksana PNS|197010242007011007|362872|sadriansyah2410@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 402|Yuyun Handayani|Pelaksana PNS|197806222007012013|578497|yuyunsanga2@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 403|Arifuddin|Pelaksana PNS|198211252012121004|134198|ary.aryanna09@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 404|Zubaidah|Pelaksana PPPK|197811242025212012|118768|idahnunaz@gmail.com|UPT Pusat Kesehatan Hewan, Muara Badak|Tata Usaha
-
 405|Joko Santoso, S.Sos., M.Si|Kepala UPT|197001292000121004|461288|nawaragil@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|
-
 406|Yudi Aspianta, SH|Pelaksana PNS|197206142001121005|398148|yudiaspianta.kejawa@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 407|Aspiani, SP|Pelaksana PNS|197104172006041013|498453|jjaspianjjaspian@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 408|Ruliansyah, SP|Pelaksana PNS|197206152008011019|293567|rully.handil@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 409|Sagir S, S.Sos|Pelaksana PNS|196810282008011011|500576|sagirajalah68@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 410|Satriani, S.Pkp|Pelaksana PNS|198205152008012025|527496|satriani.keswan@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 411|Suwito, SE|Pelaksana PNS|197805262008011015|538305|suwitobppn46@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 412|Yulianti, S.Pkp|Pelaksana PNS|197607212008012011|351635|anti.keswan@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 413|Ernawati|Pelaksana PNS|197010032007012022|253530|wernawati615@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 414|Harianto Jumadi|Pelaksana PNS|197808132008011016|377745|jumadikeswan78@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 415|Kamsiah|Pelaksana PNS|198407052008012008|573197|Iyahsahdan0003@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 416|Karno|Pelaksana PNS|197508102007011038|487136|karnosanga282@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 417|Muhamad Subrantas|Pelaksana PNS|197801062007011008|257839|muhnatsir2021@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 418|Supriadi|Pelaksana PNS|197912252008011015|318654|primagamasupriadi@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 419|Suyanto|Pelaksana PNS|197706282000121004|556514|miraahmad77@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 420|Hoeriah|Pelaksana PPPK|196909072025212007|598299|hoeriah2022@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 421|Sugiyono|Pelaksana PPPK|198007012025211045|392873|yuspiabizar23@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 422|Titi Lestari|Pelaksana PPPK|197311012025212001|257392|titilestari512@gmail.com|UPT Pusat Kesehatan Hewan, Samboja|Tata Usaha
-
 423|Subadi, A.Md.Pd|Kasubag TU UPT|196808082003121004|136736|leoboy.badi@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 424|Januri, S.Pkp|Pelaksana PNS|196902022007011021|383562|janurijatim@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 425|Masliansyah, S.Pkp|Pelaksana PNS|196912202008011008|456624|rafanahya@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 426|Jahriansah|Pelaksana PNS|197106042007011028|128444|jaykoetai@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 427|Kasmir|Pelaksana PNS|197009042008011011|446549|kasmirbatuah20@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 428|M.Sahir|Pelaksana PNS|197205062008011018|337500|msahir1972@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 429|Maria Ulfa M|Pelaksana PNS|198106092008012026|222577|uulsifa@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 430|Supriyanto|Pelaksana PNS|196901302008011012|270221|supriyantosebulu@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 431|Yuli Susanti, A.Md|Pelaksana PNS|198107182010012029|561149|yulisusanti964@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 432|Bagus Irawan|Pelaksana PPPK|198609192025211025|511906|bagus09191986@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 433|Ade Versilia Parastika|Pelaksana PPPK|199110072025212067|399485|tenggarong0765@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 434|Muhammad Arya Bekham|Pelaksana PPPK|200307172025211003|162439|aryabekham17@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 435|Hendro Susanto|Pelaksana PPPK|198510202025211082|383803|hendros964@gmail.com|UPT Pusat Kesehatan Hewan, Tenggarong Seberang|Tata Usaha
-
 436|Fathurrahman, SP|Kepala UPT|196903151994031017|344394|fathurrahmansp69@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|
-
 437|Titin Damayanti, SP|Kasubag TU UPT|197802262008012016|199238|titindamayanti23@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|Tata Usaha
-
 438|Agus Sofyan Noor, SE|Pelaksana PNS|197508252000121005|151918|agusnoor.noor@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|Tata Usaha
-
 439|Didik Prayitno|Pelaksana PNS|198303122008011019|227938|didikprayitno983@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|Tata Usaha
-
 440|Abdu Said|Pelaksana PNS|196901121999031008|138208|abdusaid121@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|Tata Usaha
-
 441|Edwin Odantara|Pelaksana PNS|196912032007011021|201982|edwinodantaraa@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|Tata Usaha
-
 442|Muhammad Syarifuddin Nur|Pelaksana PNS|197308202007011033|371983|m.syarifuddinnur@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|Tata Usaha
-
 443|Novia Mulyanti|Pelaksana PNS|198711112006042001|255817|noviamulyanti87@gmail.com|UPT Rumah Pemotongan Hewan Dan Pasar Hewan|Tata Usaha
-
 444|Irwansyah|Pelaksana PPPK|198709092025211035|525635|iwanalghazali6@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 445|Julkifli|Pelaksana PPPK|198208212025211021|561864|julkiflijul610@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 446|Lisa Yuliandari|Pelaksana PPPK|198608042025212026|102103|lisaituaku04@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 447|Mirhansyah|Pelaksana PPPK|197407022025211017|244744|amirgaruda078@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 448|Murti|Pelaksana PPPK|197211252025212002|588887|murti.murdana@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 449|Rudy Alvian|Pelaksana PPPK|197601012025211024|497912|rudialvian03@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 450|Rully Gunawan|Pelaksana PPPK|198909052025211038|383516|rulig4603@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 451|Muhammad Alief Maulana|Pelaksana PPPK|200304162025211002|331758|alipmaulana436@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha
-
 452|Ishak|Pelaksana PPPK|197107102025211016|100460|ishakcool15@gmail.com|UPT Rumah Potong Hewan Dan Pasar Hewan|Tata Usaha`,fa=e=>({Admin:0,"Kepala Dinas":1,Sekretaris:2,"Kepala Bidang":3,"Kasubag Umtal":3,"Kepala UPT":3,"Kasubag TU UPT":4})[e]||5,pa=da.trim().split(`
-`).map(e=>{let[t,n,r,i,a,o,s,c]=e.split(`|`);return{id:parseInt(t),name:n,role:r,nip:i,pin:a,email:o,dept:s,subDept:c,level:fa(r)}});function ma(){let[e,t]=(0,_.useState)(()=>{let e=ee.get(`user_session`);return e?JSON.parse(e):null}),[n,r]=(0,_.useState)(`dashboard`),[i,a]=(0,_.useState)(new Date),[o,s]=(0,_.useState)([]),[c,l]=(0,_.useState)(!1);(0,_.useEffect)(()=>{let e=setInterval(()=>a(new Date),1e3);return()=>clearInterval(e)},[]);let u=async()=>{let{data:e,error:t}=await Gi.from(`Presensi`).select(`*`).order(`waktu`,{ascending:!1});!t&&e&&s(e)};return(0,_.useEffect)(()=>{u();let e=Gi.channel(`realtime-absensi`).on(`postgres_changes`,{event:`*`,schema:`public`,table:`Presensi`},()=>u()).subscribe();return()=>Gi.removeChannel(e)},[]),e?(0,z.jsxs)(`div`,{className:`min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans`,children:[(0,z.jsxs)(`aside`,{className:`w-full md:w-64 bg-white border-r flex flex-col shadow-sm`,children:[(0,z.jsxs)(`div`,{className:`p-6 border-b flex items-center gap-3`,children:[(0,z.jsx)(na,{className:`text-green-600`}),(0,z.jsx)(`h1`,{className:`font-bold text-xl text-green-700`,children:`Absensi Distanak`})]}),(0,z.jsxs)(`div`,{className:`p-4 bg-green-50 m-4 rounded-xl`,children:[(0,z.jsx)(`p`,{className:`text-xs text-gray-500 uppercase font-bold tracking-wider`,children:`Pegawai`}),(0,z.jsx)(`p`,{className:`font-bold text-gray-800 truncate`,children:e.name}),(0,z.jsx)(`p`,{className:`text-xs text-green-700 font-medium`,children:e.role})]}),(0,z.jsxs)(`nav`,{className:`flex-1 px-4 space-y-2`,children:[(0,z.jsx)(ha,{active:n===`dashboard`,onClick:()=>r(`dashboard`),icon:(0,z.jsx)(ra,{size:20}),label:`Dashboard`}),(0,z.jsx)(ha,{active:n===`history`,onClick:()=>r(`history`),icon:(0,z.jsx)(oa,{size:20}),label:`Riwayat`}),(0,z.jsx)(ha,{active:n===`settings`,onClick:()=>r(`settings`),icon:(0,z.jsx)(R,{size:20}),label:`Akun`})]}),(0,z.jsxs)(`button`,{onClick:()=>{t(null),ee.remove(`user_session`)},className:`m-4 p-3 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 rounded-lg font-bold transition`,children:[(0,z.jsx)(sa,{size:20}),` Keluar`]})]}),(0,z.jsxs)(`main`,{className:`flex-1 flex flex-col h-screen overflow-hidden`,children:[(0,z.jsxs)(`header`,{className:`bg-white p-4 shadow-sm flex justify-between items-center px-8`,children:[(0,z.jsx)(`h2`,{className:`text-xl font-bold text-gray-800`,children:`Dashboard Utama`}),(0,z.jsxs)(`div`,{className:`flex items-center gap-4 bg-gray-100 px-4 py-2 rounded-full font-mono font-bold text-gray-700`,children:[(0,z.jsx)(ia,{size:18,className:`text-green-600`}),i.toLocaleTimeString(`id-ID`),` WITA`]})]}),(0,z.jsxs)(`div`,{className:`flex-1 overflow-y-auto p-8 space-y-8`,children:[n===`dashboard`&&(0,z.jsxs)(z.Fragment,{children:[(0,z.jsxs)(`div`,{className:`flex justify-end items-center gap-2 text-sm text-gray-500`,children:[(0,z.jsx)(`span`,{children:`Bypass Waktu (Testing)`}),(0,z.jsx)(`input`,{type:`checkbox`,checked:c,onChange:()=>l(!c),className:`w-4 h-4`})]}),(0,z.jsx)(ga,{user:e,currentTime:i,attendanceData:o,testMode:c,refresh:u}),e.role!==`Pelaksana PNS`&&e.role!==`Pelaksana PPPK`&&(0,z.jsx)(_a,{subordinates:(e=>e?e.role===`Kepala Dinas`?pa.filter(t=>t.id!==e.id):e.role===`Sekretaris`?pa.filter(t=>t.id>e.id&&[`Kasubag Umtal`,`Admin`,`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Kasubag Umtal`||e.role===`Kepala Bidang`?pa.filter(t=>t.id>e.id&&[`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Kepala UPT`?pa.filter(t=>t.id>e.id&&[`Kasubag TU UPT`,`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Kasubag TU UPT`?pa.filter(t=>t.id>e.id&&[`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Admin`?[...pa].sort((e,t)=>e.level-t.level):[]:[])(e),attendanceData:o,refresh:u,role:e.role})]}),n===`history`&&(0,z.jsx)(ya,{user:e,data:o}),n===`settings`&&(0,z.jsx)(ba,{user:e})]})]})]}):(0,z.jsx)(va,{onLogin:e=>{t(e),ee.set(`user_session`,JSON.stringify(e),{expires:7})}})}function ha({active:e,onClick:t,icon:n,label:r}){return(0,z.jsxs)(`button`,{onClick:t,className:`w-full flex items-center p-3 rounded-lg transition-all ${e?`bg-green-600 text-white shadow-lg`:`text-gray-600 hover:bg-green-50 hover:text-green-600`}`,children:[(0,z.jsx)(`span`,{className:`mr-3`,children:n}),(0,z.jsx)(`span`,{className:`font-semibold`,children:r})]})}function ga({user:e,currentTime:t,attendanceData:n,testMode:r,refresh:i}){let a=new Date().toISOString().split(`T`)[0],o=n.find(t=>t.nip===e.nip&&t.waktu.startsWith(a)),s=t.getHours()+t.getMinutes()/60,c=s>=1&&s<=15||r,l=s>=9||s<1||r,u=async n=>{let r=t.toLocaleTimeString(`id-ID`,{hour12:!1}),a=`Hadir`;n===`in`?s>8&&(a=`Terlambat`):(s<16&&(a=`Pulang Cepat`),o||(a=`Terlambat`));let c={nip:e.nip,nama:e.name,waktu:new Date().toISOString(),status:a,keterangan:n===`in`?`Check-in jam ${r}`:`Check-out jam ${r}`},{error:l}=await Gi.from(`Presensi`).insert([c]);l?alert(l.message):(alert(`Berhasil ${n===`in`?`Masuk`:`Pulang`}!`),i())};return(0,z.jsxs)(`div`,{className:`grid grid-cols-1 md:grid-cols-2 gap-6`,children:[(0,z.jsxs)(`div`,{className:`bg-white p-8 rounded-3xl shadow-sm border-t-4 border-green-500 text-center`,children:[(0,z.jsx)(`h3`,{className:`text-gray-400 font-bold uppercase text-xs tracking-widest mb-2`,children:`Presensi Masuk`}),(0,z.jsx)(`p`,{className:`text-sm mb-4`,children:`01.00 s/d 15.00`}),(0,z.jsx)(`button`,{disabled:!c,onClick:()=>u(`in`),className:`w-full py-4 rounded-2xl font-black text-xl transition-all ${c?`bg-green-500 text-white hover:scale-105 shadow-xl`:`bg-gray-100 text-gray-400 cursor-not-allowed`}`,children:`CHECK IN`})]}),(0,z.jsxs)(`div`,{className:`bg-white p-8 rounded-3xl shadow-sm border-t-4 border-orange-400 text-center`,children:[(0,z.jsx)(`h3`,{className:`text-gray-400 font-bold uppercase text-xs tracking-widest mb-2`,children:`Presensi Pulang`}),(0,z.jsx)(`p`,{className:`text-sm mb-4`,children:`09.00 s/d 24.00`}),(0,z.jsx)(`button`,{disabled:!l,onClick:()=>u(`out`),className:`w-full py-4 rounded-2xl font-black text-xl transition-all ${l?`bg-orange-500 text-white hover:scale-105 shadow-xl`:`bg-gray-100 text-gray-400 cursor-not-allowed`}`,children:`CHECK OUT`})]})]})}function _a({subordinates:e,attendanceData:t,refresh:n,role:r}){let i=new Date().toISOString().split(`T`)[0],a=async(e,t,r)=>{let{error:i}=await Gi.from(`Presensi`).insert([{nip:e,nama:t,status:r,waktu:new Date().toISOString(),keterangan:`Diubah oleh Atasan`}]);i||(alert(`Status berhasil diubah`),n())};return(0,z.jsxs)(`div`,{className:`bg-white rounded-3xl shadow-sm border overflow-hidden`,children:[(0,z.jsxs)(`div`,{className:`p-6 border-b bg-gray-50 flex justify-between items-center`,children:[(0,z.jsxs)(`h3`,{className:`font-black text-gray-700 flex items-center gap-2`,children:[(0,z.jsx)(la,{size:20,className:`text-green-600`}),` Monitoring Bawahan (`,e.length,`)`]}),(0,z.jsxs)(`div`,{className:`flex gap-2`,children:[(0,z.jsxs)(`button`,{className:`bg-white border px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 flex items-center gap-2`,children:[(0,z.jsx)(aa,{size:14}),` EXCEL`]}),(0,z.jsxs)(`button`,{className:`bg-white border px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 flex items-center gap-2`,children:[(0,z.jsx)(ca,{size:14}),` PDF`]})]})]}),(0,z.jsx)(`div`,{className:`overflow-x-auto`,children:(0,z.jsxs)(`table`,{className:`w-full text-left`,children:[(0,z.jsx)(`thead`,{className:`bg-gray-50 text-xs uppercase text-gray-400 font-bold`,children:(0,z.jsxs)(`tr`,{children:[(0,z.jsx)(`th`,{className:`p-4`,children:`Nama / Role`}),(0,z.jsx)(`th`,{className:`p-4`,children:`Informasi Kehadiran`}),(0,z.jsx)(`th`,{className:`p-4`,children:`Aksi Cepat`})]})}),(0,z.jsx)(`tbody`,{className:`divide-y text-sm`,children:e.map(e=>{let n=t.find(t=>t.nip===e.nip&&t.waktu.startsWith(i));return(0,z.jsxs)(`tr`,{className:`hover:bg-green-50/30 transition-colors`,children:[(0,z.jsxs)(`td`,{className:`p-4`,children:[(0,z.jsx)(`p`,{className:`font-bold text-gray-800`,children:e.name}),(0,z.jsxs)(`p`,{className:`text-xs text-gray-400`,children:[e.role,` • `,e.nip]})]}),(0,z.jsx)(`td`,{className:`p-4`,children:(0,z.jsx)(`span`,{className:`px-3 py-1 rounded-full text-[10px] font-black uppercase ${n?`bg-green-100 text-green-700`:`bg-red-100 text-red-600`}`,children:n?n.status:`Tanpa Keterangan`})}),(0,z.jsx)(`td`,{className:`p-4 flex gap-2`,children:(0,z.jsxs)(`select`,{onChange:t=>a(e.nip,e.name,t.target.value),className:`bg-white border rounded-lg text-xs p-1`,children:[(0,z.jsx)(`option`,{value:``,children:`Ubah Ke...`}),(0,z.jsx)(`option`,{value:`Hadir`,children:`Hadir`}),(0,z.jsx)(`option`,{value:`Sakit`,children:`Sakit`}),(0,z.jsx)(`option`,{value:`Cuti`,children:`Cuti`}),(0,z.jsx)(`option`,{value:`Terlambat`,children:`Terlambat`})]})})]},e.id)})})]})})]})}function va({onLogin:e}){let[t,n]=(0,_.useState)(``),[r,i]=(0,_.useState)(``),[a,o]=(0,_.useState)(!1);return(0,z.jsx)(`div`,{className:`min-h-screen bg-green-50 flex items-center justify-center p-4`,children:(0,z.jsxs)(`div`,{className:`bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border-t-8 border-green-600`,children:[(0,z.jsxs)(`div`,{className:`text-center mb-8`,children:[(0,z.jsx)(`div`,{className:`bg-green-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4`,children:(0,z.jsx)(na,{className:`text-green-600`,size:32})}),(0,z.jsx)(`h1`,{className:`text-2xl font-black text-gray-800`,children:`ABSENSI DISTANAK`}),(0,z.jsx)(`p`,{className:`text-gray-400 text-sm`,children:`Masukan akses kredensial Anda`})]}),(0,z.jsxs)(`form`,{onSubmit:n=>{n.preventDefault();let i=pa.find(e=>e.nip===t&&e.pin===r);i?e(i):alert(`NIP atau PIN salah!`)},className:`space-y-4`,children:[(0,z.jsxs)(`div`,{children:[(0,z.jsx)(`label`,{className:`text-xs font-bold text-gray-400 uppercase ml-2`,children:`NIP Pegawai`}),(0,z.jsx)(`input`,{type:`text`,value:t,onChange:e=>n(e.target.value),className:`w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-green-500`,placeholder:`Masukkan NIP`,required:!0})]}),(0,z.jsxs)(`div`,{children:[(0,z.jsx)(`label`,{className:`text-xs font-bold text-gray-400 uppercase ml-2`,children:`PIN / Password`}),(0,z.jsx)(`input`,{type:`password`,value:r,onChange:e=>i(e.target.value),className:`w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-green-500`,placeholder:`Masukkan PIN`,required:!0})]}),(0,z.jsx)(`button`,{type:`submit`,className:`w-full bg-green-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all`,children:`MASUK APLIKASI`})]}),(0,z.jsx)(`div`,{className:`mt-6 text-center`,children:(0,z.jsx)(`button`,{onClick:()=>alert(`Simulasi: Kode reset dikirim ke email anda di database.`),className:`text-sm font-bold text-green-600 hover:underline`,children:`Lupa PIN?`})})]})})}function ya({user:e,data:t}){let n=t.filter(t=>t.nip===e.nip);return(0,z.jsxs)(`div`,{className:`bg-white p-6 rounded-3xl shadow-sm border`,children:[(0,z.jsx)(`h3`,{className:`font-black text-gray-700 mb-4`,children:`Riwayat Kehadiran Anda`}),(0,z.jsx)(`div`,{className:`space-y-3`,children:n.map((e,t)=>(0,z.jsxs)(`div`,{className:`flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100`,children:[(0,z.jsxs)(`div`,{children:[(0,z.jsx)(`p`,{className:`font-bold`,children:new Date(e.waktu).toLocaleDateString(`id-ID`,{weekday:`long`,day:`numeric`,month:`long`})}),(0,z.jsx)(`p`,{className:`text-xs text-gray-400`,children:e.keterangan})]}),(0,z.jsx)(`span`,{className:`font-black text-green-600`,children:e.status})]},t))})]})}function ba({user:e}){return(0,z.jsxs)(`div`,{className:`max-w-md mx-auto bg-white p-8 rounded-[2rem] shadow-sm border text-center`,children:[(0,z.jsx)(`div`,{className:`w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black text-green-600`,children:e.name.charAt(0)}),(0,z.jsx)(`h2`,{className:`text-xl font-black`,children:e.name}),(0,z.jsx)(`p`,{className:`text-gray-400 mb-6`,children:e.role}),(0,z.jsxs)(`div`,{className:`text-left space-y-4`,children:[(0,z.jsxs)(`div`,{className:`p-4 bg-gray-50 rounded-2xl`,children:[(0,z.jsx)(`p`,{className:`text-[10px] font-bold text-gray-400 uppercase`,children:`Unit Kerja`}),(0,z.jsx)(`p`,{className:`font-bold text-sm text-gray-700`,children:e.dept||`Dinas Pertanian`})]}),(0,z.jsxs)(`div`,{className:`p-4 bg-gray-50 rounded-2xl`,children:[(0,z.jsx)(`p`,{className:`text-[10px] font-bold text-gray-400 uppercase`,children:`Email Terdaftar`}),(0,z.jsx)(`p`,{className:`font-bold text-sm text-gray-700`,children:e.email})]})]})]})}(0,v.createRoot)(document.getElementById(`root`)).render((0,z.jsx)(_.StrictMode,{children:(0,z.jsx)(ma,{})}));
+`).map(e=>{let[t,n,r,i,a,o,s,c]=e.split(`|`);return{id:parseInt(t),name:n,role:r,nip:i,pin:a,email:o,dept:s,subDept:c,level:fa(r)}});function ma(){let[e,t]=(0,_.useState)(()=>{let e=ee.get(`user_session`);return e?JSON.parse(e):null}),[n,r]=(0,_.useState)(`dashboard`),[i,a]=(0,_.useState)(new Date),[o,s]=(0,_.useState)([]),[c,l]=(0,_.useState)(!1);(0,_.useEffect)(()=>{let e=setInterval(()=>a(new Date),1e3);return()=>clearInterval(e)},[]);let u=async()=>{let{data:e,error:t}=await Gi.from(`Presensi`).select(`*`).order(`waktu`,{ascending:!1});!t&&e&&s(e)};return(0,_.useEffect)(()=>{u();let e=Gi.channel(`realtime-absensi`).on(`postgres_changes`,{event:`*`,schema:`public`,table:`Presensi`},()=>u()).subscribe();return()=>Gi.removeChannel(e)},[]),e?(0,z.jsxs)(`div`,{className:`min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans`,children:[(0,z.jsxs)(`aside`,{className:`w-full md:w-64 bg-white border-r flex flex-col shadow-sm`,children:[(0,z.jsxs)(`div`,{className:`p-6 border-b flex items-center gap-3`,children:[(0,z.jsx)(na,{className:`text-green-600`}),(0,z.jsx)(`h1`,{className:`font-bold text-xl text-green-700`,children:`Absensi Distanak`})]}),(0,z.jsxs)(`div`,{className:`p-4 bg-green-50 m-4 rounded-xl`,children:[(0,z.jsx)(`p`,{className:`text-xs text-gray-500 uppercase font-bold tracking-wider`,children:`Pegawai`}),(0,z.jsx)(`p`,{className:`font-bold text-gray-800 truncate`,children:e.name}),(0,z.jsx)(`p`,{className:`text-xs text-green-700 font-medium`,children:e.role})]}),(0,z.jsxs)(`nav`,{className:`flex-1 px-4 space-y-2`,children:[(0,z.jsx)(ha,{active:n===`dashboard`,onClick:()=>r(`dashboard`),icon:(0,z.jsx)(ra,{size:20}),label:`Dashboard`}),(0,z.jsx)(ha,{active:n===`history`,onClick:()=>r(`history`),icon:(0,z.jsx)(oa,{size:20}),label:`Riwayat`}),(0,z.jsx)(ha,{active:n===`settings`,onClick:()=>r(`settings`),icon:(0,z.jsx)(R,{size:20}),label:`Akun`})]}),(0,z.jsxs)(`button`,{onClick:()=>{t(null),ee.remove(`user_session`)},className:`m-4 p-3 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 rounded-lg font-bold transition`,children:[(0,z.jsx)(sa,{size:20}),` Keluar`]})]}),(0,z.jsxs)(`main`,{className:`flex-1 flex flex-col h-screen overflow-hidden`,children:[(0,z.jsxs)(`header`,{className:`bg-white p-4 shadow-sm flex justify-between items-center px-8`,children:[(0,z.jsx)(`h2`,{className:`text-xl font-bold text-gray-800`,children:`Dashboard Utama`}),(0,z.jsxs)(`div`,{className:`flex items-center gap-4 bg-gray-100 px-4 py-2 rounded-full font-mono font-bold text-gray-700`,children:[(0,z.jsx)(ia,{size:18,className:`text-green-600`}),i.toLocaleTimeString(`id-ID`),` WITA`]})]}),(0,z.jsxs)(`div`,{className:`flex-1 overflow-y-auto p-8 space-y-8`,children:[n===`dashboard`&&(0,z.jsxs)(z.Fragment,{children:[(0,z.jsxs)(`div`,{className:`flex justify-end items-center gap-2 text-sm text-gray-500`,children:[(0,z.jsx)(`span`,{children:`Bypass Waktu (Testing)`}),(0,z.jsx)(`input`,{type:`checkbox`,checked:c,onChange:()=>l(!c),className:`w-4 h-4`})]}),(0,z.jsx)(ga,{user:e,currentTime:i,attendanceData:o,testMode:c,refresh:u}),e.role!==`Pelaksana PNS`&&e.role!==`Pelaksana PPPK`&&(0,z.jsx)(_a,{subordinates:(e=>e?e.role===`Kepala Dinas`?pa.filter(t=>t.id!==e.id):e.role===`Sekretaris`?pa.filter(t=>t.id>e.id&&[`Kasubag Umtal`,`Admin`,`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Kasubag Umtal`||e.role===`Kepala Bidang`?pa.filter(t=>t.id>e.id&&[`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Kepala UPT`?pa.filter(t=>t.id>e.id&&[`Kasubag TU UPT`,`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Kasubag TU UPT`?pa.filter(t=>t.id>e.id&&[`Pelaksana PNS`,`Pelaksana PPPK`].includes(t.role)):e.role===`Admin`?[...pa].sort((e,t)=>e.level-t.level):[]:[])(e),attendanceData:o,refresh:u,role:e.role})]}),n===`history`&&(0,z.jsx)(ya,{user:e,data:o}),n===`settings`&&(0,z.jsx)(ba,{user:e})]})]})]}):(0,z.jsx)(va,{onLogin:e=>{t(e),ee.set(`user_session`,JSON.stringify(e),{expires:7})}})}function ha({active:e,onClick:t,icon:n,label:r}){return(0,z.jsxs)(`button`,{onClick:t,className:`w-full flex items-center p-3 rounded-lg transition-all ${e?`bg-green-600 text-white shadow-lg`:`text-gray-600 hover:bg-green-50 hover:text-green-600`}`,children:[(0,z.jsx)(`span`,{className:`mr-3`,children:n}),(0,z.jsx)(`span`,{className:`font-semibold`,children:r})]})}function ga({user:e,currentTime:t,attendanceData:n,testMode:r,refresh:i}){let a=new Date().toISOString().split(`T`)[0],o=n.find(t=>t.nip===e.nip&&t.waktu.startsWith(a)),s=t.getHours()+t.getMinutes()/60,c=s>=1&&s<=15||r,l=s>=9||s<1||r,u=async n=>{let r=t.toLocaleTimeString(`id-ID`,{hour12:!1}),a=`Hadir`;n===`in`?s>8&&(a=`Terlambat`):(s<16&&(a=`Pulang Cepat`),o||(a=`Terlambat`));let c={nip:e.nip,nama:e.nama,waktu:new Date().toISOString(),status:a,keterangan:n===`in`?`Check-in jam ${r}`:`Check-out jam ${r}`},{error:l}=await Gi.from(`Presensi`).insert([c]);l?alert(l.message):(alert(`Berhasil ${n===`in`?`Masuk`:`Pulang`}!`),i())};return(0,z.jsxs)(`div`,{className:`grid grid-cols-1 md:grid-cols-2 gap-6`,children:[(0,z.jsxs)(`div`,{className:`bg-white p-8 rounded-3xl shadow-sm border-t-4 border-green-500 text-center`,children:[(0,z.jsx)(`h3`,{className:`text-gray-400 font-bold uppercase text-xs tracking-widest mb-2`,children:`Presensi Masuk`}),(0,z.jsx)(`p`,{className:`text-sm mb-4`,children:`01.00 s/d 15.00`}),(0,z.jsx)(`button`,{disabled:!c,onClick:()=>u(`in`),className:`w-full py-4 rounded-2xl font-black text-xl transition-all ${c?`bg-green-500 text-white hover:scale-105 shadow-xl`:`bg-gray-100 text-gray-400 cursor-not-allowed`}`,children:`CHECK IN`})]}),(0,z.jsxs)(`div`,{className:`bg-white p-8 rounded-3xl shadow-sm border-t-4 border-orange-400 text-center`,children:[(0,z.jsx)(`h3`,{className:`text-gray-400 font-bold uppercase text-xs tracking-widest mb-2`,children:`Presensi Pulang`}),(0,z.jsx)(`p`,{className:`text-sm mb-4`,children:`09.00 s/d 24.00`}),(0,z.jsx)(`button`,{disabled:!l,onClick:()=>u(`out`),className:`w-full py-4 rounded-2xl font-black text-xl transition-all ${l?`bg-orange-500 text-white hover:scale-105 shadow-xl`:`bg-gray-100 text-gray-400 cursor-not-allowed`}`,children:`CHECK OUT`})]})]})}function _a({subordinates:e,attendanceData:t,refresh:n,role:r}){let i=new Date().toISOString().split(`T`)[0],a=async(e,t,r)=>{let{error:i}=await Gi.from(`Presensi`).insert([{nip:e,nama:t,status:r,waktu:new Date().toISOString(),keterangan:`Diubah oleh Atasan`}]);i||(alert(`Status berhasil diubah`),n())};return(0,z.jsxs)(`div`,{className:`bg-white rounded-3xl shadow-sm border overflow-hidden`,children:[(0,z.jsxs)(`div`,{className:`p-6 border-b bg-gray-50 flex justify-between items-center`,children:[(0,z.jsxs)(`h3`,{className:`font-black text-gray-700 flex items-center gap-2`,children:[(0,z.jsx)(la,{size:20,className:`text-green-600`}),` Monitoring Bawahan (`,e.length,`)`]}),(0,z.jsxs)(`div`,{className:`flex gap-2`,children:[(0,z.jsxs)(`button`,{className:`bg-white border px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 flex items-center gap-2`,children:[(0,z.jsx)(aa,{size:14}),` EXCEL`]}),(0,z.jsxs)(`button`,{className:`bg-white border px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 flex items-center gap-2`,children:[(0,z.jsx)(ca,{size:14}),` PDF`]})]})]}),(0,z.jsx)(`div`,{className:`overflow-x-auto`,children:(0,z.jsxs)(`table`,{className:`w-full text-left`,children:[(0,z.jsx)(`thead`,{className:`bg-gray-50 text-xs uppercase text-gray-400 font-bold`,children:(0,z.jsxs)(`tr`,{children:[(0,z.jsx)(`th`,{className:`p-4`,children:`Nama / Role`}),(0,z.jsx)(`th`,{className:`p-4`,children:`Informasi Kehadiran`}),(0,z.jsx)(`th`,{className:`p-4`,children:`Aksi Cepat`})]})}),(0,z.jsx)(`tbody`,{className:`divide-y text-sm`,children:e.map(e=>{let n=t.find(t=>t.nip===e.nip&&t.waktu.startsWith(i));return(0,z.jsxs)(`tr`,{className:`hover:bg-green-50/30 transition-colors`,children:[(0,z.jsxs)(`td`,{className:`p-4`,children:[(0,z.jsx)(`p`,{className:`font-bold text-gray-800`,children:e.name}),(0,z.jsxs)(`p`,{className:`text-xs text-gray-400`,children:[e.role,` • `,e.nip]})]}),(0,z.jsx)(`td`,{className:`p-4`,children:(0,z.jsx)(`span`,{className:`px-3 py-1 rounded-full text-[10px] font-black uppercase ${n?`bg-green-100 text-green-700`:`bg-red-100 text-red-600`}`,children:n?n.status:`Tanpa Keterangan`})}),(0,z.jsx)(`td`,{className:`p-4 flex gap-2`,children:(0,z.jsxs)(`select`,{onChange:t=>a(e.nip,e.name,t.target.value),className:`bg-white border rounded-lg text-xs p-1`,children:[(0,z.jsx)(`option`,{value:``,children:`Ubah Ke...`}),(0,z.jsx)(`option`,{value:`Hadir`,children:`Hadir`}),(0,z.jsx)(`option`,{value:`Sakit`,children:`Sakit`}),(0,z.jsx)(`option`,{value:`Cuti`,children:`Cuti`}),(0,z.jsx)(`option`,{value:`Terlambat`,children:`Terlambat`})]})})]},e.id)})})]})})]})}function va({onLogin:e}){let[t,n]=(0,_.useState)(``),[r,i]=(0,_.useState)(``),[a,o]=(0,_.useState)(!1);return(0,z.jsx)(`div`,{className:`min-h-screen bg-green-50 flex items-center justify-center p-4`,children:(0,z.jsxs)(`div`,{className:`bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border-t-8 border-green-600`,children:[(0,z.jsxs)(`div`,{className:`text-center mb-8`,children:[(0,z.jsx)(`div`,{className:`bg-green-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4`,children:(0,z.jsx)(na,{className:`text-green-600`,size:32})}),(0,z.jsx)(`h1`,{className:`text-2xl font-black text-gray-800`,children:`ABSENSI DISTANAK`}),(0,z.jsx)(`p`,{className:`text-gray-400 text-sm`,children:`Masukan akses kredensial Anda`})]}),(0,z.jsxs)(`form`,{onSubmit:n=>{n.preventDefault();let i=pa.find(e=>e.nip===t&&e.pin===r);i?e(i):alert(`NIP atau PIN salah!`)},className:`space-y-4`,children:[(0,z.jsxs)(`div`,{children:[(0,z.jsx)(`label`,{className:`text-xs font-bold text-gray-400 uppercase ml-2`,children:`NIP Pegawai`}),(0,z.jsx)(`input`,{type:`text`,value:t,onChange:e=>n(e.target.value),className:`w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-green-500`,placeholder:`Masukkan NIP`,required:!0})]}),(0,z.jsxs)(`div`,{children:[(0,z.jsx)(`label`,{className:`text-xs font-bold text-gray-400 uppercase ml-2`,children:`PIN / Password`}),(0,z.jsx)(`input`,{type:`password`,value:r,onChange:e=>i(e.target.value),className:`w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-green-500`,placeholder:`Masukkan PIN`,required:!0})]}),(0,z.jsx)(`button`,{type:`submit`,className:`w-full bg-green-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all`,children:`MASUK APLIKASI`})]}),(0,z.jsx)(`div`,{className:`mt-6 text-center`,children:(0,z.jsx)(`button`,{onClick:()=>alert(`Simulasi: Kode reset dikirim ke email anda di database.`),className:`text-sm font-bold text-green-600 hover:underline`,children:`Lupa PIN?`})})]})})}function ya({user:e,data:t}){let n=t.filter(t=>t.nip===e.nip);return(0,z.jsxs)(`div`,{className:`bg-white p-6 rounded-3xl shadow-sm border`,children:[(0,z.jsx)(`h3`,{className:`font-black text-gray-700 mb-4`,children:`Riwayat Kehadiran Anda`}),(0,z.jsx)(`div`,{className:`space-y-3`,children:n.map((e,t)=>(0,z.jsxs)(`div`,{className:`flex justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100`,children:[(0,z.jsxs)(`div`,{children:[(0,z.jsx)(`p`,{className:`font-bold`,children:new Date(e.waktu).toLocaleDateString(`id-ID`,{weekday:`long`,day:`numeric`,month:`long`})}),(0,z.jsx)(`p`,{className:`text-xs text-gray-400`,children:e.keterangan})]}),(0,z.jsx)(`span`,{className:`font-black text-green-600`,children:e.status})]},t))})]})}function ba({user:e}){return(0,z.jsxs)(`div`,{className:`max-w-md mx-auto bg-white p-8 rounded-[2rem] shadow-sm border text-center`,children:[(0,z.jsx)(`div`,{className:`w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black text-green-600`,children:e.name.charAt(0)}),(0,z.jsx)(`h2`,{className:`text-xl font-black`,children:e.name}),(0,z.jsx)(`p`,{className:`text-gray-400 mb-6`,children:e.role}),(0,z.jsxs)(`div`,{className:`text-left space-y-4`,children:[(0,z.jsxs)(`div`,{className:`p-4 bg-gray-50 rounded-2xl`,children:[(0,z.jsx)(`p`,{className:`text-[10px] font-bold text-gray-400 uppercase`,children:`Unit Kerja`}),(0,z.jsx)(`p`,{className:`font-bold text-sm text-gray-700`,children:e.dept||`Dinas Pertanian`})]}),(0,z.jsxs)(`div`,{className:`p-4 bg-gray-50 rounded-2xl`,children:[(0,z.jsx)(`p`,{className:`text-[10px] font-bold text-gray-400 uppercase`,children:`Email Terdaftar`}),(0,z.jsx)(`p`,{className:`font-bold text-sm text-gray-700`,children:e.email})]})]})]})}(0,v.createRoot)(document.getElementById(`root`)).render((0,z.jsx)(_.StrictMode,{children:(0,z.jsx)(ma,{})}));
