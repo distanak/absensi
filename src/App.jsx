@@ -244,7 +244,7 @@ const rawCSVData = `1|M.Sahir|WFA|197205062008011018|197205062008011018|distanak
 217|Leli Mahdalena, S.Sos|WFA|197604122007012033|197604122007012033|distanak@kukarkab.go.id|Pos Keswan Loa Kulu|
 218|Indra Budiman|WFA|198101282010011002|198101282010011002|distanak@kukarkab.go.id|Pos Keswan Loa Kulu|
 219|Edy Saputra, SP|WFA|197202011994021001|197202011994021001|distanak@kukarkab.go.id|Pos Keswan Loa Kulu|
-220|Rusdiansyah, S.Hut.|WFA|197404062008011014|197404062008011014|distanak@kukarkab.go.id|UPT Pembibitan Sapi Potong|
+220|Rusdiansyah, S.Hut|WFA|197404062008011014|197404062008011014|distanak@kukarkab.go.id|UPT Pembibitan Sapi Potong|
 221|Mita|WFA|198610092025212026|198610092025212026|distanak@kukarkab.go.id|UPT Pembibitan Sapi Potong|
 222|Muhtadin|WFA|198812312025211071|198812312025211071|distanak@kukarkab.go.id|UPT Pembibitan Sapi Potong|`; 
 
