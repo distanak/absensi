@@ -139,7 +139,7 @@ const rawCSVData = `1|M.Sahir|WFA|197205062008011018|197205062008011018|distanak
 112|Mirhansyah|WFA|197208262007011011|197208262007011011|distanak@kukarkab.go.id|Balai Penyuluhan Pertanian Kembang Janggut|
 113|Al Qadri|WFA|197505102025211055|197505102025211055|distanak@kukarkab.go.id|Balai Penyuluhan Pertanian Sebulu|
 114|Suharyono, SP|WFA|197308011997031003|197308011997031003|distanak@kukarkab.go.id|Pos Balai Benih Pembantu TP Sebulu|
-115|Hery Marsudi J, SP, MP|WFA|196906012000121007|196906012000121007|distanak@kukarkab.go.id|UPT Balai Benih Pembantu Tanaman Pangan|
+115|Rusdiansyah, S.Hut|WFA|197404062008011014|197404062008011014|distanak@kukarkab.go.id|UPT Pembibitan Sapi Potong|
 116|Siyamto|WFA|197709032025211023|197709032025211023|distanak@kukarkab.go.id|UPT Balai Benih Pembantu Hortikultura|
 117|Elvi Noor Sukaisih, SP|WFA|197101132007012009|197101132007012009|distanak@kukarkab.go.id|UPT Balai Proteksi Tanaman Pangan dan Hortikultura|
 118|Suyatun, SP|WFA|197307012008012017|197307012008012017|distanak@kukarkab.go.id|UPT Balai Proteksi Tanaman Pangan dan Hortikultura|
